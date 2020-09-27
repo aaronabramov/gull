@@ -1,4 +1,4 @@
-# LL - Rust Logging Library
+# gull - Static types definitions code generator
 
 [![Crates.io][crates-badge]][crates-url]
 [![Docs.rs][docs-badge]][docs-url]
