@@ -1,24 +1,6 @@
-[package]
-name = "gull"
-version = "0.0.0"
-authors = ["Aaron Abramov <aaron@abramov.io>"]
-edition = "2018"
-description = "type generation"
-license = "MIT"
-repository = "https://github.com/aaronabramov/gull"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0"
-serde = { version = "1.0.101", features = ["derive"] }
-serde_cbor = "0.9"
-serde_json = "1.0"
-
-[dev-dependencies]
-k9 = "0.2"
-
-[[test]]
-name = "e2e"
-path = "e2e/mod.rs"
-
+members = [
+    "gull",
+    "docblock",
+]
