@@ -1,1 +1,2 @@
-mod basic_codegen_test;
+mod project;
+mod rust_codegen_test;
