@@ -25,13 +25,15 @@ fn rust() {
     assert_matches_inline_snapshot!(
         Rust::gen_list(make_ast()),
         "
-struct Test {
+#[derive(Debug)]
+pub struct Test {
   pub name: String,
   pub id: i32,
   pub age: i32,
 }
 
-struct WrapsTest {
+#[derive(Debug)]
+pub struct WrapsTest {
   pub test_inside: Test,
 }
 "
