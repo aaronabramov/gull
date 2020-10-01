@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+use std::process::Command;
 
 pub const TEST_CARGO_TOML: &str = r#"
 [package]
@@ -64,7 +65,82 @@ impl Project {
         Ok(())
     }
 
-    pub fn root_dir(&self) -> &Path {
-        &self.root_dir
+    pub fn run(&self, command: &str) -> Result<CommandOutput> {
+        let mut split = command.split_whitespace();
+        let command = split.next().context("command is empty")?;
+
+        let mut cmd = Command::new(command);
+        cmd.current_dir(&self.root_dir);
+
+        for arg in split {
+            cmd.arg(arg);
+        }
+
+        let output = cmd
+            .output()
+            .with_context(|| format!("Failed to get command's output. Command: `{}`", command))?;
+
+        let stdout = String::from_utf8(output.stdout)?;
+        let stderr = String::from_utf8(output.stderr)?;
+        Ok(CommandOutput {
+            command: command.to_string(),
+            stdout,
+            stderr,
+            exit_code: output.status.code(),
+            success: output.status.success(),
+        })
+    }
+
+    // Given a path relative to this project's root, return an absolute path
+    pub fn absolute_path(&self, path: &str) -> Result<String> {
+        let mut absolute_path = self.root_dir.clone();
+        absolute_path.push(path);
+        Ok(absolute_path.display().to_string())
+    }
+}
+
+pub struct CommandOutput {
+    pub command: String,
+    pub stdout: String,
+    pub stderr: String,
+    pub exit_code: Option<i32>,
+    pub success: bool,
+}
+
+impl CommandOutput {
+    pub fn assert_success(&self) -> Result<()> {
+        if !self.success {
+            anyhow::bail!(format!(
+                "
+            Expected command `{}` to exit successfully, but it didn't.
+
+            EXIT_CODE: {:?}
+
+            STDOUT: 
+            VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+
+
+            {}
+
+
+
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+            STDERR:
+            VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+            
+
+
+            {}
+
+
+
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ",
+                self.command, self.exit_code, self.stdout, self.stderr
+            ))
+        }
+        Ok(())
     }
 }
