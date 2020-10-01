@@ -1,7 +1,6 @@
 use crate::project::Project;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use k9::*;
-use std::process::Command;
 
 #[test]
 fn rust_codegen() -> Result<()> {
@@ -17,20 +16,12 @@ fn hello() {
 }"#,
     )?;
 
-    let mut cmd = Command::new("cargo");
-    cmd.current_dir(p.root_dir()).arg("test").arg("--lib");
+    let output = p.run("cargo test --lib")?;
 
-    let output = cmd.output().context("failed to get command's output")?;
-
-    let exit_code = output.status.code();
-    let success = output.status.success();
-
-    let stdout = String::from_utf8(output.stdout)?;
-
-    assert_equal!(exit_code, Some(0));
-    assert_equal!(success, true);
+    assert_equal!(output.exit_code, Some(0));
+    assert_equal!(output.success, true);
     assert_matches_inline_snapshot!(
-        stdout,
+        output.stdout,
         "
 running 1 test
 test hello ... ok
