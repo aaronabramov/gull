@@ -4,7 +4,7 @@ pub struct Rust;
 
 impl Codegen for Rust {
     fn gen_struct(s: &StructDef) -> String {
-        let mut result = format!("\nstruct {} {{\n", s.name);
+        let mut result = format!("\n#[derive(Debug)]\npub struct {} {{\n", s.name);
 
         for (name, def) in &s.fields {
             result.push_str(&format!("  pub {}: {},\n", name, Self::gen_type(def)));
