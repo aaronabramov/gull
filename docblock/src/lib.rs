@@ -28,53 +28,53 @@ enum Line {
 #[derive(Debug)]
 pub struct SourceFile {
     doc_block: Vec<Line>,
-    rest: String,
+    pub rest: String,
 }
 
 impl SourceFile {
     pub fn from_source(source: &str) -> Self {
-        let captures = DOCBLOCK_RE.captures(source).unwrap();
+        if let Some(captures) = DOCBLOCK_RE.captures(source) {
+            if let Some(block) = captures.name("block") {
+                // split the file into two pieces
+                //      - docblock
+                //      - rest of the code without docblock
+                let doc_block_str = &source[block.start()..block.end()]
+                    // can probably do it with the regex, but i can't figure out how
+                    .trim_end_matches("*/");
+                let rest = &source[block.end()..].trim_start();
 
-        if let Some(block) = captures.name("block") {
-            // split the file into two pieces
-            //      - docblock
-            //      - rest of the code without docblock
-            let doc_block_str = &source[block.start()..block.end()]
-                // can probably do it with the regex, but i can't figure out how
-                .trim_end_matches("*/");
-            let rest = &source[block.end()..].trim_start();
+                let lines = doc_block_str.split('\n').collect::<Vec<&str>>();
+                let lines = lines
+                    .iter()
+                    // trim all the witespace around as well as the leading `*` in the beginning of each comment line
+                    .map(|l| l.trim().trim_start_matches('*').trim_start())
+                    .filter(|l| !l.is_empty())
+                    .map(|l| {
+                        if let Some(captures) = DIRECTIVE_RE.captures(l) {
+                            let key = captures
+                                .name("key")
+                                .expect("`key` capture must be there")
+                                .as_str()
+                                .to_string();
 
-            let lines = doc_block_str.split('\n').collect::<Vec<&str>>();
-            let lines = lines
-                .iter()
-                // trim all the witespace around as well as the leading `*` in the beginning of each comment line
-                .map(|l| l.trim().trim_start_matches('*').trim_start())
-                .filter(|l| !l.is_empty())
-                .map(|l| {
-                    if let Some(captures) = DIRECTIVE_RE.captures(l) {
-                        let key = captures
-                            .name("key")
-                            .expect("`key` capture must be there")
-                            .as_str()
-                            .to_string();
+                            let value = captures.name("value").map(|v| v.as_str().to_string());
+                            Line::Directive { key, value }
+                        } else {
+                            Line::Text(l.to_string())
+                        }
+                    })
+                    .collect::<Vec<Line>>();
 
-                        let value = captures.name("value").map(|v| v.as_str().to_string());
-                        Line::Directive { key, value }
-                    } else {
-                        Line::Text(l.to_string())
-                    }
-                })
-                .collect::<Vec<Line>>();
-
-            Self {
-                doc_block: lines,
-                rest: rest.to_string(),
+                return Self {
+                    doc_block: lines,
+                    rest: rest.to_string(),
+                };
             }
-        } else {
-            Self {
-                doc_block: vec![],
-                rest: source.to_string(),
-            }
+        }
+
+        Self {
+            doc_block: vec![],
+            rest: source.to_string(),
         }
     }
 
@@ -114,6 +114,11 @@ impl SourceFile {
                     self.doc_block.push(to_add.take().expect("must be there"));
                 }
                 // add lines in reverse order one by one
+                self.doc_block.push(line);
+            }
+
+            // If it still there (e.g. docblock was empty). Add it
+            if let Some(line) = to_add {
                 self.doc_block.push(line);
             }
 

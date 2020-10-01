@@ -1,4 +1,5 @@
 pub mod codegen;
+pub mod sign_source;
 
 #[derive(Clone)]
 pub struct StructDef {
