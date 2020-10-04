@@ -1,4 +1,4 @@
-use crate::make_ast;
+use crate::nested_records_ast;
 use crate::project::Project;
 use anyhow::Result;
 use gull::{codegen::Rust, sign_source::sign_source, Codegen};
@@ -8,7 +8,7 @@ use k9::*;
 fn rust_codegen() -> Result<()> {
     let p = Project::new("rust_codegen_test")?;
 
-    let generated = Rust::gen_list(make_ast());
+    let generated = Rust::gen_decls(nested_records_ast());
     let signed = sign_source(&generated);
 
     p.write_default_cargo_toml()?;
@@ -44,7 +44,7 @@ fn hello() {
         output.stdout,
         "
 running 1 test
-WrapsTest { test_inside: Test { name: \"hi\", id: 44, age: 55 } }
+WrapsTest { test_inside: Test { age: 55, id: 44, name: \"hi\" } }
 test hello ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
