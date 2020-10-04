@@ -24,17 +24,17 @@ pub struct WrapsTest {
 }
 
 #[test]
-fn flow() {
+fn flow_nested_records() {
     assert_matches_inline_snapshot!(
         Flow::gen_decls(nested_records_ast()),
         "
- export type Test = {
+export type Test = {
   age: number,
   id: number,
   name: string,
 };
 
- export type WrapsTest = {
+export type WrapsTest = {
   test_inside: Test,
 };
 "
@@ -76,6 +76,22 @@ pub enum Event {
 pub struct EventHistory {
   pub history: Vec<Event>,
 }
+"
+    );
+}
+
+#[test]
+fn flow_enums_and_vecs() {
+    assert_matches_inline_snapshot!(
+        Flow::gen_decls(enums_and_vecs_ast()),
+        "
+export type Event = Click | KeyPress;
+export type Click = {| click: [number, number] |};
+export type KeyPress = {| keyPress: [string] |};
+
+export type EventHistory = {
+  history: Array<Event>,
+};
 "
     );
 }
