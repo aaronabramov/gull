@@ -28,7 +28,7 @@ impl Codegen for Rust {
                 result
             }
             GullType::TEnum(variants) => {
-                let mut result = format!("\nenum {} {{\n", name);
+                let mut result = format!("\n#[derive(Debug)]\npub enum {} {{\n", name);
 
                 for (variant, variant_args) in variants {
                     result.push_str(&format!("  {}(", variant));

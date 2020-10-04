@@ -66,7 +66,8 @@ fn rust_enums_and_vecs() {
     assert_matches_inline_snapshot!(
         Rust::gen_decls(enums_and_vecs_ast()),
         "
-enum Event {
+#[derive(Debug)]
+pub enum Event {
   Click(i32,i32,),
   KeyPress(String,),
 }
