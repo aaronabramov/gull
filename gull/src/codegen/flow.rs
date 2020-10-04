@@ -18,7 +18,7 @@ impl Codegen for Flow {
 
         match gull_type {
             GullType::TRecord(fields) => {
-                let mut result = format!("\n export type {} = {{\n", name);
+                let mut result = format!("\nexport type {} = {{\n", name);
 
                 for (name, field_ty) in fields {
                     result.push_str(&format!("  {}: {},\n", name, Self::gen_type(field_ty)));
@@ -28,20 +28,44 @@ impl Codegen for Flow {
                 result
             }
             GullType::TEnum(variants) => {
-                let mut result = format!("\n export type {} = \n", name);
+                let mut result = format!("\nexport type {} = ", name);
+
+                let mut variant_iter = variants.iter();
+
+                if let Some((first_variant, _)) = variant_iter.next() {
+                    result.push_str(first_variant);
+                }
+
+                for (variant, _) in variant_iter {
+                    result.push_str(&format!(" | {}", variant));
+                }
+                result.push_str(";\n");
 
                 for (variant, variant_args) in variants {
-                    result.push_str(&format!("// variant {}", variant));
+                    let lower_cased = {
+                        let mut r = variant.clone();
+                        r.get_mut(0..1).map(|r| r.make_ascii_lowercase());
+                        r
+                    };
+
+                    result.push_str(&format!("export type {} = ", variant));
+                    result.push_str(&format!("{{| {}: ", lower_cased));
                     result.push_str("[");
-                    for arg in variant_args {
-                        result.push_str(&format!("{},", Self::gen_type(arg)));
+
+                    let mut variant_args_iter = variant_args.iter();
+
+                    if let Some(arg) = variant_args_iter.next() {
+                        result.push_str(&Self::gen_type(arg));
+                    }
+
+                    for arg in variant_args_iter {
+                        result.push_str(&format!(", {}", Self::gen_type(arg)));
                     }
 
                     result.push_str("]");
 
-                    result.push_str(";\n");
+                    result.push_str(" |};\n");
                 }
-                result.push_str("};\n");
 
                 result
             }
