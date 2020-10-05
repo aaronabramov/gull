@@ -1,5 +1,5 @@
-use crate::nested_records_ast;
 use crate::project::Project;
+use crate::{enums_and_vecs_ast, nested_records_ast};
 use anyhow::Result;
 use gull::{codegen::Flow, sign_source::sign_source, Codegen};
 use k9::*;
@@ -8,7 +8,9 @@ use k9::*;
 fn flow_codegen() -> Result<()> {
     let p = Project::new("flow_codegen_test")?;
 
-    let generated = format!("//@flow \n {}", Flow::gen_decls(nested_records_ast()));
+    let mut generated = format!("//@flow \n {}", Flow::gen_decls(nested_records_ast()));
+
+    generated.push_str(&Flow::gen_decls(enums_and_vecs_ast()));
     let signed = sign_source(&generated);
 
     p.write_file(
@@ -45,7 +47,7 @@ fn flow_codegen() -> Result<()> {
         "index.js",
         r#"
 // @flow
-import type {WrapsTest, Test} from './types';
+import type {WrapsTest, Test, EventHistory, Event} from './types';
 
 let a: WrapsTest = {
     test_inside: {
@@ -54,6 +56,11 @@ let a: WrapsTest = {
             age: 55,
     }
 };
+
+let test_event_history: EventHistory = {
+    history: [{ click: [10, 20] }, { keyPress: ["a"]}]
+};
+
 console.log(a);
 "#,
     )?;
