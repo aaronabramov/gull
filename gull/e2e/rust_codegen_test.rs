@@ -1,5 +1,5 @@
-use crate::make_ast;
 use crate::project::Project;
+use crate::{enums_and_vecs_ast, nested_records_ast};
 use anyhow::Result;
 use gull::{codegen::Rust, sign_source::sign_source, Codegen};
 use k9::*;
@@ -8,7 +8,8 @@ use k9::*;
 fn rust_codegen() -> Result<()> {
     let p = Project::new("rust_codegen_test")?;
 
-    let generated = Rust::gen_list(make_ast());
+    let mut generated = Rust::gen_decls(nested_records_ast());
+    generated.push_str(&Rust::gen_decls(enums_and_vecs_ast()));
     let signed = sign_source(&generated);
 
     p.write_default_cargo_toml()?;
@@ -18,7 +19,7 @@ fn rust_codegen() -> Result<()> {
         "lib.rs",
         r#"
 mod types;
-use types::{Test, WrapsTest};
+use types::{Test, WrapsTest, EventHistory, Event};
 
 #[test]
 fn hello() {
@@ -30,7 +31,14 @@ fn hello() {
         }
     };
 
+
     println!("{:?}", test_struct);
+
+    let test_event_history = EventHistory {
+        history: vec![Event::KeyPress("a".to_string()), Event::Click(1, 2)]
+    };
+
+    println!("{:?}", test_event_history);
     assert!(true);
 }"#,
     )?;
@@ -44,7 +52,8 @@ fn hello() {
         output.stdout,
         "
 running 1 test
-WrapsTest { test_inside: Test { name: \"hi\", id: 44, age: 55 } }
+WrapsTest { test_inside: Test { age: 55, id: 44, name: \"hi\" } }
+EventHistory { history: [KeyPress(\"a\"), Click(1, 2)] }
 test hello ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out

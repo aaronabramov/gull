@@ -1,10 +1,17 @@
 use crate::project::Project;
+use crate::{enums_and_vecs_ast, nested_records_ast};
 use anyhow::Result;
+use gull::{codegen::Flow, sign_source::sign_source, Codegen};
 use k9::*;
 
 #[test]
 fn flow_codegen() -> Result<()> {
     let p = Project::new("flow_codegen_test")?;
+
+    let mut generated = format!("//@flow \n {}", Flow::gen_decls(nested_records_ast()));
+
+    generated.push_str(&Flow::gen_decls(enums_and_vecs_ast()));
+    let signed = sign_source(&generated);
 
     p.write_file(
         "package.json",
@@ -34,13 +41,27 @@ fn flow_codegen() -> Result<()> {
 [strict]",
     )?;
 
+    p.write_file("types.js", &signed)?;
+
     p.write_file(
         "index.js",
         r#"
 // @flow
+import type {WrapsTest, Test, EventHistory, Event} from './types';
 
-let a: number = 5;
-console.log("hello");
+let a: WrapsTest = {
+    test_inside: {
+            name: "hi",
+            id: 44,
+            age: 55,
+    }
+};
+
+let test_event_history: EventHistory = {
+    history: [{ click: [10, 20] }, { keyPress: ["a"]}]
+};
+
+console.log(a);
 "#,
     )?;
 
@@ -60,7 +81,7 @@ console.log("hello");
     assert_equal!(output.exit_code, Some(0));
     assert_matches_inline_snapshot!(
         output.stdout,
-        "hello
+        "{ test_inside: { name: 'hi', id: 44, age: 55 } }
 "
     );
     Ok(())

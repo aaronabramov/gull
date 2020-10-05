@@ -22,10 +22,5 @@ hex = "0.4.2"
 k9 = "0.2"
 
 [[test]]
-name = "integration"
-path = "integration/mod.rs"
-
-
-[[test]]
 name = "e2e"
 path = "e2e/mod.rs"
