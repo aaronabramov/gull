@@ -37,7 +37,7 @@ function make_test(): Test {
 
     let hh_output = p.run("hh_client")?;
 
-    assert_matches_inline_snapshot!(
+    snapshot!(
         &hh_output.stdout,
         "No errors!
 "
@@ -48,7 +48,7 @@ function make_test(): Test {
 
     output.assert_success()?;
     assert_equal!(output.exit_code, Some(0));
-    assert_matches_inline_snapshot!(
+    snapshot!(
         output.stdout,
         "array(1) {
   [\"hello\"]=>

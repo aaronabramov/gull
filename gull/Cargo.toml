@@ -19,7 +19,8 @@ sha2 = "0.9.1"
 hex = "0.4.2"
 
 [dev-dependencies]
-k9 = "0.2"
+k9 = "0.10"
+regex = "1"
 
 [[test]]
 name = "e2e"

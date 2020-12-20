@@ -48,17 +48,24 @@ fn hello() {
     output.assert_success()?;
 
     assert_equal!(output.exit_code, Some(0));
-    assert_matches_inline_snapshot!(
-        output.stdout,
-        "
+    snapshot!(
+        sanitize_cargo_test_output(&output.stdout),
+        r#"
+
 running 1 test
-WrapsTest { test_inside: Test { age: 55, id: 44, name: \"hi\" } }
-EventHistory { history: [KeyPress(\"a\"), Click(1, 2)] }
+WrapsTest { test_inside: Test { age: 55, id: 44, name: "hi" } }
+EventHistory { history: [KeyPress("a"), Click(1, 2)] }
 test hello ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 
-"
+
+"#
     );
     Ok(())
+}
+
+pub fn sanitize_cargo_test_output(s: &str) -> String {
+    let regex = regex::Regex::new(r#"; finished in \d+\.\d\ds"#).unwrap();
+    regex.replace_all(s, "").to_string()
 }

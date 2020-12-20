@@ -5,6 +5,7 @@ use gull::{codegen::Flow, sign_source::sign_source, Codegen};
 use k9::*;
 
 #[test]
+#[ignore]
 fn flow_codegen() -> Result<()> {
     let p = Project::new("flow_codegen_test")?;
 
@@ -68,7 +69,7 @@ console.log(a);
     p.run("npm install")?.assert_success()?;
     let flow_output = p.run(&p.absolute_path("./node_modules/.bin/flow")?)?;
 
-    assert_matches_inline_snapshot!(
+    snapshot!(
         &flow_output.stdout,
         "No errors!
 "
@@ -79,7 +80,7 @@ console.log(a);
 
     output.assert_success()?;
     assert_equal!(output.exit_code, Some(0));
-    assert_matches_inline_snapshot!(
+    snapshot!(
         output.stdout,
         "{ test_inside: { name: 'hi', id: 44, age: 55 } }
 "

@@ -35,17 +35,19 @@ console.log(1 + a);
 
         let signed = sign_source(source);
 
-        assert_matches_inline_snapshot!(
+        snapshot!(
             signed,
-            "/*
+            r#"
+/*
  * @generated
  * @signed_source 9c5583c9e6a1018a3ea5e32943816cd0dadd967f714aba23e31d67fd388a417d
  */
 
 
-let a = \"hello world\";
+let a = "hello world";
 console.log(1 + a);
-        "
+        
+"#
         );
     }
 }
