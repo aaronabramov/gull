@@ -1,59 +1,59 @@
-use crate::{Codegen, GullType, GullTypeDecl};
+use super::Codegen;
+use crate::definitions::{PrimitiveType, StructField, StructFieldType, TypeDeclaration};
+use anyhow::Result;
 
-pub struct Rust;
+pub struct RustCodegen;
 
-impl Codegen for Rust {
-    fn gen_decls(decls: Vec<GullTypeDecl>) -> String {
-        let mut result = String::from("");
+impl Codegen for RustCodegen {
+    fn gen_declarations(declarations: &Vec<TypeDeclaration>) -> Result<String> {
+        let mut r = String::new();
 
-        for decl in decls {
-            result.push_str(&Self::gen_type_decl(&decl));
+        for declaration in declarations {
+            r.push('\n');
+
+            r.push_str(&Self::gen_declaration(declaration)?);
+
+            r.push('\n');
         }
 
-        result
+        Ok(r)
     }
-
-    fn gen_type_decl(decl: &GullTypeDecl) -> String {
-        let GullTypeDecl { name, gull_type } = decl;
-
-        match gull_type {
-            GullType::TRecord(fields) => {
-                let mut result = format!("\n#[derive(Debug)]\npub struct {} {{\n", name);
-
-                for (name, field_ty) in fields {
-                    result.push_str(&format!("  pub {}: {},\n", name, Self::gen_type(field_ty)));
-                }
-                result.push_str("}\n");
-
-                result
+    fn gen_declaration(declaration: &TypeDeclaration) -> Result<String> {
+        let r = match declaration {
+            TypeDeclaration::PrimitiveType { name, value } => {
+                format!("type {} = {};", name, gen_primitive_type(value))
             }
-            GullType::TEnum(variants) => {
-                let mut result = format!("\n#[derive(Debug)]\npub enum {} {{\n", name);
-
-                for (variant, variant_args) in variants {
-                    result.push_str(&format!("  {}(", variant));
-                    for arg in variant_args {
-                        result.push_str(&format!("{},", Self::gen_type(arg)));
-                    }
-
-                    result.push_str("),\n");
-                }
-                result.push_str("}\n");
-
-                result
+            TypeDeclaration::Struct { name, fields } => {
+                format!(
+                    r#"struct {} {{ 
+{}
+}}"#,
+                    name,
+                    gen_struct_fields(fields)
+                )
             }
-            _ => todo!("can only declare records and enums"),
-        }
+        };
+
+        Ok(r)
+    }
+}
+
+fn gen_primitive_type(ty: &PrimitiveType) -> &'static str {
+    match ty {
+        PrimitiveType::String => "String",
+        PrimitiveType::Tbool => "bool",
+        PrimitiveType::Ti32 => "i32",
+    }
+}
+
+fn gen_struct_fields(fields: &[StructField]) -> String {
+    let mut r = String::new();
+
+    for field in fields {
+        let field_type = match field {};
+
+        r.push_str(&format!("    {}: {},", field.name, field_type));
     }
 
-    fn gen_type(ty: &GullType) -> String {
-        match ty {
-            GullType::TString => "String".to_string(),
-            GullType::Ti32 => "i32".to_string(),
-            GullType::TVec(vec_ty) => format!("Vec<{}>", Self::gen_type(vec_ty)),
-            GullType::TSymbol(sym_name) => sym_name.to_string(),
-            GullType::TRecord(_) => panic!("no anonymous records allowed in our rust codegen yet"),
-            GullType::TEnum(_) => panic!("I haven't thought about anonymous enums yet"),
-        }
-    }
+    r
 }

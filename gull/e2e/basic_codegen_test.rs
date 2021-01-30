@@ -1,107 +1,65 @@
-use crate::{enums_and_vecs_ast, nested_records_ast};
-use gull::codegen::{Flow, Rust};
-use gull::*;
-use k9::*;
+// use gull::codegen::{ Rust};
+use crate::project::Project;
+use anyhow::Result;
+use gull::definitions::*;
 
-#[test]
-fn rust() {
-    snapshot!(
-        Rust::gen_decls(nested_records_ast()),
-        "
+fn make_declarations() -> Declarations {
+    let mut c = Declarations::new();
 
-#[derive(Debug)]
-pub struct Test {
-  pub age: i32,
-  pub id: i32,
-  pub name: String,
-}
+    let node_id = c.add(TypeDeclaration::PrimitiveType {
+        name: "NodeID",
+        value: PrimitiveType::String,
+    });
 
-#[derive(Debug)]
-pub struct WrapsTest {
-  pub test_inside: Test,
-}
+    c.add(TypeDeclaration::Struct {
+        name: "GraphNode",
+        value: Struct {
+            fields: vec![StructField {
+                name: "node_id",
+                field_type: StructFieldType::Reference(node_id),
+            }],
+        },
+    });
 
-"
-    );
-}
-
-#[test]
-fn flow_nested_records() {
-    snapshot!(
-        Flow::gen_decls(nested_records_ast()),
-        "
-
-export type Test = {
-  age: number,
-  id: number,
-  name: string,
-};
-
-export type WrapsTest = {
-  test_inside: Test,
-};
-
-"
-    );
+    c
 }
 
 #[test]
-fn rust_nested_records() {
-    snapshot!(
-        Rust::gen_decls(nested_records_ast()),
-        "
+fn basic_test() -> Result<()> {
+    let p = Project::new("basic_codegen_test")?;
 
-#[derive(Debug)]
-pub struct Test {
-  pub age: i32,
-  pub id: i32,
-  pub name: String,
+    let declarations = make_declarations();
+    k9::snapshot!(declarations.codegen_rust()?, "");
+
+    k9::snapshot!(
+        declarations,
+        r#"
+Declarations {
+    declarations: [
+        PrimitiveType {
+            name: "NodeID",
+            value: String,
+        },
+        Struct {
+            name: "GraphNode",
+            value: Struct {
+                fields: [
+                    StructField {
+                        name: "node_id",
+                        field_type: Reference(
+                            PrimitiveType {
+                                name: "NodeID",
+                                value: String,
+                            },
+                        ),
+                    },
+                ],
+            },
+        },
+    ],
 }
-
-#[derive(Debug)]
-pub struct WrapsTest {
-  pub test_inside: Test,
-}
-
-"
+"#
     );
-}
 
-#[test]
-fn rust_enums_and_vecs() {
-    snapshot!(
-        Rust::gen_decls(enums_and_vecs_ast()),
-        "
-
-#[derive(Debug)]
-pub enum Event {
-  Click(i32,i32,),
-  KeyPress(String,),
-}
-
-#[derive(Debug)]
-pub struct EventHistory {
-  pub history: Vec<Event>,
-}
-
-"
-    );
-}
-
-#[test]
-fn flow_enums_and_vecs() {
-    snapshot!(
-        Flow::gen_decls(enums_and_vecs_ast()),
-        "
-
-export type Event = Click | KeyPress;
-export type Click = {| click: [number, number] |};
-export type KeyPress = {| keyPress: [string] |};
-
-export type EventHistory = {
-  history: Array<Event>,
-};
-
-"
-    );
+    Ok(())
 }

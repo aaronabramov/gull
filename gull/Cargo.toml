@@ -19,7 +19,7 @@ sha2 = "0.9.1"
 hex = "0.4.2"
 
 [dev-dependencies]
-k9 = "0.10"
+k9 = "*"
 regex = "1"
 
 [[test]]
