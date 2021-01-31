@@ -57,6 +57,7 @@ pub enum TupleItem {
 #[derive(Debug, Clone)]
 pub struct TypeDeclaration {
     pub name: &'static str,
+    pub docs: &'static str,
     pub value: DeclarationValue,
 }
 

@@ -1,3 +1,4 @@
+use super::docs::{format_docstring, CommentStyle};
 use super::Codegen;
 use crate::definitions::*;
 use anyhow::Result;
@@ -31,7 +32,7 @@ impl HackCodegen {
     }
 
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
-        let r = match &declaration.value {
+        let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => format!(
                 "type {} = {};",
                 declaration.name,
@@ -49,6 +50,10 @@ impl HackCodegen {
             }
             DeclarationValue::TEnum(e) => self.gen_enum(declaration.name, e),
         };
+
+        if let Some(doc) = format_docstring(declaration.docs, CommentStyle::DoubleSlash, 0) {
+            r = format!("{}\n{}", doc, r);
+        }
 
         Ok(r)
     }
