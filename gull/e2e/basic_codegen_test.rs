@@ -143,8 +143,8 @@ type Operation = shape(
     'type' => OperationType,
     ?'Fetch' => ?tuple(int),
     ?'Store' => ? shape(
-    'frames' => vec<Frame>,
-),
+        'frames' => vec<Frame>,
+    ),
 );
 
 type NodeID = int;
