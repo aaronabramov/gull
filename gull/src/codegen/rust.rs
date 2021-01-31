@@ -59,7 +59,7 @@ impl RustCodegen {
                 format!("type {} = {};", declaration.name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                format!("struct {} {}", declaration.name, self.gen_struct(s))
+                format!("struct {} {}", declaration.name, self.gen_struct(s, 0))
             }
             DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),
         };
@@ -106,8 +106,10 @@ impl RustCodegen {
         format!("Option<{}>", value)
     }
 
-    fn gen_struct(&self, s: &TStruct) -> String {
+    fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
         let mut fields = String::new();
+
+        let indent = " ".repeat(indent);
 
         for field in &s.fields {
             let field_type = match &field.field_type {
@@ -119,10 +121,10 @@ impl RustCodegen {
                 StructFieldType::TVec(v) => self.gen_vec(v),
             };
 
-            fields.push_str(&format!("\n    {}: {},", field.name, field_type));
+            fields.push_str(&format!("\n    {}{}: {},", &indent, field.name, field_type));
         }
 
-        format!("{{{}\n}}", fields)
+        format!("{{{}\n{}}}", fields, indent)
     }
 
     fn gen_enum(&self, e: &TEnum) -> String {
@@ -132,7 +134,7 @@ impl RustCodegen {
             let variant_type = match &variant.variant_type {
                 EnumVariantType::Empty => "".into(),
                 EnumVariantType::Tuple(t) => self.gen_tuple(t),
-                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s)),
+                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
             };
 
             variants.push_str(&format!("\n  {}{},", variant.name, variant_type));

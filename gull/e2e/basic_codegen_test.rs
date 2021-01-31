@@ -99,8 +99,8 @@ type Frame = (String, i64);
 enum Operation {
   Fetch(i64),
   Store {
-    frames: Vec<Frame>,
-},
+        frames: Vec<Frame>,
+    },
   Drop,
 }
 
