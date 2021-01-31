@@ -46,6 +46,16 @@ impl RustCodegen {
     }
 
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
+        let mut prefix = String::new();
+        for config in &declaration.config {
+            match config {
+                TypeDeclarationConfig::RustAttribute(attr) => {
+                    prefix.push_str(attr);
+                    prefix.push('\n')
+                }
+            }
+        }
+
         let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => format!(
                 "type {} = {};",
@@ -60,6 +70,7 @@ impl RustCodegen {
                 format!("type {} = {};", declaration.name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
+                prefix.push_str("#[derive(Debug, serde::Serialize, serde::Deserialize)\n");
                 format!("struct {} {}", declaration.name, self.gen_struct(s, 0))
             }
             DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),
@@ -69,7 +80,7 @@ impl RustCodegen {
             r = format!("{}\n{}", doc, r);
         }
 
-        Ok(r)
+        Ok(format!("{}{}", prefix, r))
     }
 
     fn gen_map(&self, m: &TMap) -> String {
@@ -111,12 +122,22 @@ impl RustCodegen {
         format!("Option<{}>", value)
     }
 
-    fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
+    fn gen_struct(&self, s: &TStruct, indent_level: usize) -> String {
         let mut fields = String::new();
 
-        let prefix = " ".repeat(indent);
+        let indent = " ".repeat(indent_level);
 
-        for field in &s.fields {
+        for (i, field) in s.fields.iter().enumerate() {
+            let mut field_prefix = String::new();
+
+            for config in &field.config {
+                match config {
+                    StructFieldConfig::RustAttribute(attr) => {
+                        field_prefix.push_str(&format!("\n    {}{}", indent, attr))
+                    }
+                }
+            }
+
             let field_type = match &field.field_type {
                 StructFieldType::Reference(r) => r.name.into(),
                 StructFieldType::TMap(m) => self.gen_map(m),
@@ -126,16 +147,18 @@ impl RustCodegen {
                 StructFieldType::TVec(v) => self.gen_vec(v),
             };
 
-            let mut field_str = format!("\n    {}{}: {},", &prefix, field.name, field_type);
+            let mut field_str = format!("\n    {}{}: {},", &indent, field.name, field_type);
 
-            if let Some(doc) = format_docstring(field.docs, CommentStyle::TripleSlash, indent + 4) {
+            if let Some(doc) =
+                format_docstring(field.docs, CommentStyle::TripleSlash, indent_level + 4)
+            {
                 field_str = format!("\n{}{}", doc, field_str);
             }
 
-            fields.push_str(&field_str);
+            fields.push_str(&format!("{}{}", field_prefix, field_str));
         }
 
-        format!("{{{}\n{}}}", fields, prefix)
+        format!("{{{}\n{}}}", fields, indent)
     }
 
     fn gen_enum(&self, e: &TEnum) -> String {
