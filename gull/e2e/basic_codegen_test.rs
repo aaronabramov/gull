@@ -99,8 +99,8 @@ type Frame = (String, i64);
 enum Operation {
   Fetch(i64),
   Store {
-    frames: Vec<Frame>,
-},
+        frames: Vec<Frame>,
+    },
   Drop,
 }
 
@@ -143,8 +143,8 @@ type Operation = shape(
     'type' => OperationType,
     ?'Fetch' => ?tuple(int),
     ?'Store' => ? shape(
-    'frames' => vec<Frame>,
-),
+        'frames' => vec<Frame>,
+    ),
 );
 
 type NodeID = int;

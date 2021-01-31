@@ -45,7 +45,7 @@ impl HackCodegen {
                 format!("type {} = {};", declaration.name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                format!("type {} = {};", declaration.name, self.gen_struct(s))
+                format!("type {} = {};", declaration.name, self.gen_struct(s, 0))
             }
             DeclarationValue::TEnum(e) => self.gen_enum(declaration.name, e),
         };
@@ -90,8 +90,10 @@ impl HackCodegen {
         format!("?{}", value)
     }
 
-    fn gen_struct(&self, s: &TStruct) -> String {
+    fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
         let mut fields = String::new();
+
+        let indent = " ".repeat(indent);
 
         for field in &s.fields {
             let field_type = match &field.field_type {
@@ -103,10 +105,13 @@ impl HackCodegen {
                 StructFieldType::TVec(v) => self.gen_vec(v),
             };
 
-            fields.push_str(&format!("\n    '{}' => {},", field.name, field_type));
+            fields.push_str(&format!(
+                "\n    {}'{}' => {},",
+                &indent, field.name, field_type
+            ));
         }
 
-        format!("shape({}\n)", fields)
+        format!("shape({}\n{})", fields, indent)
     }
 
     fn gen_enum(&self, name: &str, e: &TEnum) -> String {
@@ -137,7 +142,7 @@ impl HackCodegen {
             let variant_type = match &variant.variant_type {
                 EnumVariantType::Empty => None,
                 EnumVariantType::Tuple(t) => Some(self.gen_tuple(t)),
-                EnumVariantType::Struct(s) => Some(format!(" {}", self.gen_struct(s))),
+                EnumVariantType::Struct(s) => Some(format!(" {}", self.gen_struct(s, 4))),
             };
 
             if let Some(variant_type) = variant_type {
