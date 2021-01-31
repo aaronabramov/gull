@@ -1,5 +1,5 @@
 use super::TypeDeclaration;
-use crate::codegen::{Codegen, RustCodegen};
+use crate::codegen::{Codegen, HackCodegen, RustCodegen};
 use anyhow::Result;
 
 #[derive(Debug)]
@@ -21,5 +21,9 @@ impl Declarations {
 
     pub fn codegen_rust(&self) -> Result<String> {
         RustCodegen::gen_declarations(&self.declarations)
+    }
+
+    pub fn codegen_hack(&self) -> Result<String> {
+        HackCodegen::gen_declarations(&self.declarations)
     }
 }

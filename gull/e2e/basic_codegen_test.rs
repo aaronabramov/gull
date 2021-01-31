@@ -88,9 +88,7 @@ fn make_declarations() -> Declarations {
 }
 
 #[test]
-fn basic_test() -> Result<()> {
-    let p = Project::new("basic_codegen_test")?;
-
+fn rust_test() -> Result<()> {
     let declarations = make_declarations();
     k9::snapshot!(
         declarations.codegen_rust()?,
@@ -122,6 +120,14 @@ struct GraphData {
 
 "
     );
+
+    Ok(())
+}
+
+#[test]
+fn hack_test() -> Result<()> {
+    let declarations = make_declarations();
+    k9::snapshot!(declarations.codegen_hack()?, "");
 
     Ok(())
 }
