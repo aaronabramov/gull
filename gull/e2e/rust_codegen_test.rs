@@ -31,7 +31,6 @@
 //         }
 //     };
 
-
 //     println!("{:?}", test_struct);
 
 //     let test_event_history = EventHistory {
@@ -58,7 +57,6 @@
 // test hello ... ok
 
 // test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
-
 
 // "#
 //     );
