@@ -179,9 +179,10 @@ use a::b::c;
         source_file.set_directive("hello", Some("bro"));
         source_file.set_directive("ohio", None);
 
-        assert_matches_inline_snapshot!(
+        snapshot!(
             source_file.to_source(),
-            "/*
+            "
+/*
  * @hello bro
  * @dog cat
  * @hi hello
@@ -190,7 +191,8 @@ use a::b::c;
  */
 
 use a::b::c;
-1 + 1"
+1 + 1
+"
         );
     }
 }

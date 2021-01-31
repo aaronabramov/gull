@@ -1,107 +1,166 @@
-use crate::{enums_and_vecs_ast, nested_records_ast};
-use gull::codegen::{Flow, Rust};
-use gull::*;
-use k9::*;
+use anyhow::Result;
+use gull::definitions::*;
 
-#[test]
-fn rust() {
-    snapshot!(
-        Rust::gen_decls(nested_records_ast()),
-        "
+fn make_declarations() -> Declarations {
+    let mut c = Declarations::new();
 
-#[derive(Debug)]
-pub struct Test {
-  pub age: i32,
-  pub id: i32,
-  pub name: String,
+    let frame = c.add(TypeDeclaration {
+        name: "Frame",
+        value: DeclarationValue::TTuple(TTuple {
+            items: vec![
+                TupleItem::TPrimitive(TPrimitive::String),
+                TupleItem::TPrimitive(TPrimitive::Ti64),
+            ],
+        }),
+    });
+
+    c.add(TypeDeclaration {
+        name: "Operation",
+        value: DeclarationValue::TEnum(TEnum {
+            variants: vec![
+                EnumVariant {
+                    name: "Fetch",
+                    variant_type: EnumVariantType::Tuple(TTuple {
+                        items: vec![TupleItem::TPrimitive(TPrimitive::Ti64)],
+                    }),
+                },
+                EnumVariant {
+                    name: "Store",
+                    variant_type: EnumVariantType::Struct(TStruct {
+                        fields: vec![StructField {
+                            name: "frames",
+                            field_type: StructFieldType::TVec(TVec::Reference(frame)),
+                        }],
+                    }),
+                },
+                EnumVariant {
+                    name: "Drop",
+                    variant_type: EnumVariantType::Empty,
+                },
+            ],
+        }),
+    });
+
+    let node_id = c.add(TypeDeclaration {
+        name: "NodeID",
+        value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
+    });
+
+    let graph_node = c.add(TypeDeclaration {
+        name: "GraphNode",
+        value: DeclarationValue::TStruct(TStruct {
+            fields: vec![StructField {
+                name: "node_id",
+                field_type: StructFieldType::Reference(node_id),
+            }],
+        }),
+    });
+
+    c.add(TypeDeclaration {
+        name: "GraphData",
+        value: DeclarationValue::TStruct(TStruct {
+            fields: vec![
+                StructField {
+                    name: "entry_points",
+                    field_type: StructFieldType::TVec(TVec::TPrimitive(TPrimitive::Ti64)),
+                },
+                StructField {
+                    name: "nodes",
+                    field_type: StructFieldType::TMap(TMap {
+                        key: TPrimitive::Ti64,
+                        value: TMapValue::Reference(graph_node),
+                    }),
+                },
+                StructField {
+                    name: "string_fields",
+                    field_type: StructFieldType::TOption(TOption::TMap(TMap {
+                        key: TPrimitive::String,
+                        value: TMapValue::TPrimitive(TPrimitive::String),
+                    })),
+                },
+            ],
+        }),
+    });
+
+    c
 }
 
-#[derive(Debug)]
-pub struct WrapsTest {
-  pub test_inside: Test,
+#[test]
+fn rust_test() -> Result<()> {
+    let declarations = make_declarations();
+    k9::snapshot!(
+        declarations.codegen_rust()?,
+        "
+use std::collections::BTreeMap;
+
+
+type Frame = (String, i64);
+
+enum Operation {
+  Fetch(i64),
+  Store {
+    frames: Vec<Frame>,
+},
+  Drop,
+}
+
+type NodeID = i64;
+
+struct GraphNode {
+    node_id: NodeID,
+}
+
+struct GraphData {
+    entry_points: Vec<i64>,
+    nodes: BTreeMap<i64, GraphNode>,
+    string_fields: Option<BTreeMap<String, String>>,
 }
 
 "
     );
+
+    Ok(())
 }
 
 #[test]
-fn flow_nested_records() {
-    snapshot!(
-        Flow::gen_decls(nested_records_ast()),
-        "
+fn hack_test() -> Result<()> {
+    let declarations = make_declarations();
+    k9::snapshot!(
+        declarations.codegen_hack()?,
+        r#"
 
-export type Test = {
-  age: number,
-  id: number,
-  name: string,
-};
 
-export type WrapsTest = {
-  test_inside: Test,
-};
+type Frame = tuple(string, int);
 
-"
+
+enum OperationType: string as string {
+    FETCH = "Fetch",
+    STORE = "Store",
+    DROP = "Drop",
+}
+
+type Operation = shape(
+    'type' => OperationType,
+    ?'Fetch' => ?tuple(int),
+    ?'Store' => ? shape(
+    'frames' => vec<Frame>,
+),
+);
+
+type NodeID = int;
+
+type GraphNode = shape(
+    'node_id' => NodeID,
+);
+
+type GraphData = shape(
+    'entry_points' => vec<int>,
+    'nodes' => dict<int, GraphNode>,
+    'string_fields' => ?dict<string, string>,
+);
+
+"#
     );
-}
 
-#[test]
-fn rust_nested_records() {
-    snapshot!(
-        Rust::gen_decls(nested_records_ast()),
-        "
-
-#[derive(Debug)]
-pub struct Test {
-  pub age: i32,
-  pub id: i32,
-  pub name: String,
-}
-
-#[derive(Debug)]
-pub struct WrapsTest {
-  pub test_inside: Test,
-}
-
-"
-    );
-}
-
-#[test]
-fn rust_enums_and_vecs() {
-    snapshot!(
-        Rust::gen_decls(enums_and_vecs_ast()),
-        "
-
-#[derive(Debug)]
-pub enum Event {
-  Click(i32,i32,),
-  KeyPress(String,),
-}
-
-#[derive(Debug)]
-pub struct EventHistory {
-  pub history: Vec<Event>,
-}
-
-"
-    );
-}
-
-#[test]
-fn flow_enums_and_vecs() {
-    snapshot!(
-        Flow::gen_decls(enums_and_vecs_ast()),
-        "
-
-export type Event = Click | KeyPress;
-export type Click = {| click: [number, number] |};
-export type KeyPress = {| keyPress: [string] |};
-
-export type EventHistory = {
-  history: Array<Event>,
-};
-
-"
-    );
+    Ok(())
 }

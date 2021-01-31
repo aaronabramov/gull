@@ -1,16 +1,12 @@
 use super::Codegen;
 use crate::definitions::*;
 use anyhow::Result;
-use std::cell::RefCell;
-use std::collections::BTreeSet;
 
-pub struct RustCodegen {
-    imports: RefCell<BTreeSet<&'static str>>,
-}
+pub struct HackCodegen {}
 
-impl Codegen for RustCodegen {
+impl Codegen for HackCodegen {
     fn gen_declarations(declarations: &Vec<TypeDeclaration>) -> Result<String> {
-        let rc = RustCodegen::new();
+        let rc = HackCodegen::new();
 
         let mut declarations_code = String::new();
 
@@ -22,10 +18,6 @@ impl Codegen for RustCodegen {
 
         let mut result = String::new();
 
-        for import in rc.imports.borrow().iter() {
-            result.push_str(&format!("{}\n", import));
-        }
-
         result.push('\n');
         result.push_str(&declarations_code);
 
@@ -33,15 +25,9 @@ impl Codegen for RustCodegen {
     }
 }
 
-impl RustCodegen {
+impl HackCodegen {
     fn new() -> Self {
-        Self {
-            imports: RefCell::new(BTreeSet::new()),
-        }
-    }
-
-    fn add_import(&self, import: &'static str) {
-        self.imports.borrow_mut().insert(import);
+        Self {}
     }
 
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
@@ -59,9 +45,9 @@ impl RustCodegen {
                 format!("type {} = {};", declaration.name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                format!("struct {} {}", declaration.name, self.gen_struct(s))
+                format!("type {} = {};", declaration.name, self.gen_struct(s))
             }
-            DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),
+            DeclarationValue::TEnum(e) => self.gen_enum(declaration.name, e),
         };
 
         Ok(r)
@@ -73,8 +59,7 @@ impl RustCodegen {
             TMapValue::Reference(d) => d.name,
         };
 
-        self.add_import("use std::collections::BTreeMap;");
-        format!("BTreeMap<{}, {}>", self.gen_primitive_type(&m.key), value)
+        format!("dict<{}, {}>", self.gen_primitive_type(&m.key), value)
     }
 
     fn gen_vec(&self, v: &TVec) -> String {
@@ -82,7 +67,7 @@ impl RustCodegen {
             TVec::TPrimitive(p) => self.gen_primitive_type(p),
             TVec::Reference(d) => d.name,
         };
-        format!("Vec<{}>", value)
+        format!("vec<{}>", value)
     }
 
     fn gen_set(&self, s: &TSet) -> String {
@@ -91,8 +76,7 @@ impl RustCodegen {
             TSet::Reference(d) => d.name,
         };
 
-        self.add_import("use std::collections::BTreeSet;");
-        format!("BTreeSet<{}>", value)
+        format!("keyset<{}>", value)
     }
 
     fn gen_option(&self, o: &TOption) -> String {
@@ -103,7 +87,7 @@ impl RustCodegen {
             TOption::TVec(v) => self.gen_vec(v),
             TOption::TSet(s) => self.gen_set(s),
         };
-        format!("Option<{}>", value)
+        format!("?{}", value)
     }
 
     fn gen_struct(&self, s: &TStruct) -> String {
@@ -119,26 +103,55 @@ impl RustCodegen {
                 StructFieldType::TVec(v) => self.gen_vec(v),
             };
 
-            fields.push_str(&format!("\n    {}: {},", field.name, field_type));
+            fields.push_str(&format!("\n    '{}' => {},", field.name, field_type));
         }
 
-        format!("{{{}\n}}", fields)
+        format!("shape({}\n)", fields)
     }
 
-    fn gen_enum(&self, e: &TEnum) -> String {
+    fn gen_enum(&self, name: &str, e: &TEnum) -> String {
+        let mut variant_types = vec![];
+
+        for variant in &e.variants {
+            variant_types.push(format!(
+                r#"    {} = "{}",{}"#,
+                variant.name.to_uppercase(),
+                variant.name,
+                "\n"
+            ));
+        }
+
+        let variant_type_enum_name = format!("{}Type", name);
+
+        let variant_type_hack_enum = format!(
+            "enum {}: string as string {{\n{}}}",
+            variant_type_enum_name,
+            variant_types.join("")
+        );
+
         let mut variants = String::new();
+
+        variants.push_str(&format!("\n    'type' => {},", variant_type_enum_name));
 
         for variant in &e.variants {
             let variant_type = match &variant.variant_type {
-                EnumVariantType::Empty => "".into(),
-                EnumVariantType::Tuple(t) => self.gen_tuple(t),
-                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s)),
+                EnumVariantType::Empty => None,
+                EnumVariantType::Tuple(t) => Some(self.gen_tuple(t)),
+                EnumVariantType::Struct(s) => Some(format!(" {}", self.gen_struct(s))),
             };
 
-            variants.push_str(&format!("\n  {}{},", variant.name, variant_type));
+            if let Some(variant_type) = variant_type {
+                variants.push_str(&format!("\n    ?'{}' => ?{},", variant.name, variant_type));
+            }
         }
 
-        format!("{{{}\n}}", variants)
+        format!(
+            "
+{}
+
+type {} = shape({}\n);",
+            variant_type_hack_enum, name, variants
+        )
     }
 
     fn gen_tuple(&self, t: &TTuple) -> String {
@@ -158,15 +171,15 @@ impl RustCodegen {
             }
         }
 
-        format!("({})", values)
+        format!("tuple({})", values)
     }
 
     fn gen_primitive_type(&self, ty: &TPrimitive) -> &'static str {
         match ty {
-            TPrimitive::String => "String",
+            TPrimitive::String => "string",
             TPrimitive::Tbool => "bool",
-            TPrimitive::Ti64 => "i64",
-            TPrimitive::Tf64 => "f64",
+            TPrimitive::Ti64 => "int",
+            TPrimitive::Tf64 => "float",
         }
     }
 }
