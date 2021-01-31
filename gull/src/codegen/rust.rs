@@ -1,93 +1,157 @@
 use super::Codegen;
 use crate::definitions::*;
 use anyhow::Result;
+use std::cell::RefCell;
+use std::collections::BTreeSet;
 
-pub struct RustCodegen;
+pub struct RustCodegen {
+    imports: RefCell<BTreeSet<&'static str>>,
+}
 
 impl Codegen for RustCodegen {
     fn gen_declarations(declarations: &Vec<TypeDeclaration>) -> Result<String> {
-        let mut r = String::new();
+        let rc = RustCodegen::new();
+
+        let mut declarations_code = String::new();
 
         for declaration in declarations {
-            r.push('\n');
-
-            r.push_str(&Self::gen_declaration(declaration)?);
-
-            r.push('\n');
+            declarations_code.push('\n');
+            declarations_code.push_str(&rc.gen_declaration(declaration)?);
+            declarations_code.push('\n');
         }
 
-        Ok(r)
+        let mut result = String::new();
+
+        for import in rc.imports.borrow().iter() {
+            result.push_str(&format!("{}\n", import));
+        }
+
+        result.push('\n');
+        result.push_str(&declarations_code);
+
+        Ok(result)
+    }
+}
+
+impl RustCodegen {
+    fn new() -> Self {
+        Self {
+            imports: RefCell::new(BTreeSet::new()),
+        }
     }
 
-    fn gen_declaration(declaration: &TypeDeclaration) -> Result<String> {
+    fn add_import(&self, import: &'static str) {
+        self.imports.borrow_mut().insert(import);
+    }
+
+    fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
         let r = match &declaration.value {
-            DeclarationValue::TPrimitive(p) => {
-                format!("type {} = {};", declaration.name, gen_primitive_type(p)).into()
+            DeclarationValue::TPrimitive(p) => format!(
+                "type {} = {};",
+                declaration.name,
+                self.gen_primitive_type(p)
+            )
+            .into(),
+            DeclarationValue::TMap(m) => {
+                format!("type {} = {};", declaration.name, self.gen_map(m))
             }
-            DeclarationValue::TMap(m) => format!("type {} = {};", declaration.name, gen_map(m)),
-            DeclarationValue::TStruct(s) => gen_struct(declaration.name, s),
-            _ => panic!(format!("{:?}", declaration)),
+            DeclarationValue::TTuple(t) => {
+                format!("type {} = {};", declaration.name, self.gen_tuple(t))
+            }
+            DeclarationValue::TStruct(s) => self.gen_struct(declaration.name, s),
         };
-        // TypeDeclaration::TPrimitive { name, value } => {
-        //                 format!("type {} = {};", name, gen_primitive_type(value))
-        //             }
-        //             TypeDeclaration::Struct { name, fields } => {
-        //                 format!(
-        //                     r#"struct {} {{
-        // {}
-        // }}"#,
-        //                     name,
-        //                     gen_struct_fields(fields)
-        //                 )
-        //             }
-        //         };
 
         Ok(r)
     }
-}
 
-fn gen_map(m: &TMap) -> String {
-    let value = match &m.value {
-        TMapValue::TPrimitive(p) => gen_primitive_type(p),
-        TMapValue::Reference(d) => d.name,
-    };
-    format!("BTreeMap<{}, {}>", gen_primitive_type(&m.key), value)
-}
-
-fn gen_vec(v: &TVec) -> String {
-    let value = match &v {
-        TVec::TPrimitive(p) => gen_primitive_type(p),
-        TVec::Reference(d) => d.name,
-    };
-    format!("Vec<{}>", value)
-}
-
-fn gen_struct(name: &str, s: &TStruct) -> String {
-    let mut fields = String::new();
-
-    for field in &s.fields {
-        let field_type = match &field.field_type {
-            StructFieldType::Reference(r) => r.name.into(),
-            StructFieldType::TPrimitive(p) => gen_primitive_type(&p).into(),
-            StructFieldType::TMap(m) => gen_map(m),
-            StructFieldType::TVec(v) => gen_vec(v),
+    fn gen_map(&self, m: &TMap) -> String {
+        let value = match &m.value {
+            TMapValue::TPrimitive(p) => self.gen_primitive_type(p),
+            TMapValue::Reference(d) => d.name,
         };
 
-        fields.push_str(&format!("\n    {}: {},", field.name, field_type));
+        self.add_import("use std::collections::BTreeMap;");
+        format!("BTreeMap<{}, {}>", self.gen_primitive_type(&m.key), value)
     }
 
-    format!(
-        "struct {} {{{}
-}}",
-        name, fields
-    )
-}
+    fn gen_vec(&self, v: &TVec) -> String {
+        let value = match &v {
+            TVec::TPrimitive(p) => self.gen_primitive_type(p),
+            TVec::Reference(d) => d.name,
+        };
+        format!("Vec<{}>", value)
+    }
 
-fn gen_primitive_type(ty: &TPrimitive) -> &'static str {
-    match ty {
-        TPrimitive::String => "String",
-        TPrimitive::Tbool => "bool",
-        TPrimitive::Ti64 => "i64",
-        TPrimitive::Tf64 => "f64",
+    fn gen_set(&self, s: &TSet) -> String {
+        let value = match &s {
+            TSet::TPrimitive(p) => self.gen_primitive_type(p),
+            TSet::Reference(d) => d.name,
+        };
+
+        self.add_import("use std::collections::BTreeSet;");
+        format!("BTreeSet<{}>", value)
+    }
+
+    fn gen_option(&self, o: &TOption) -> String {
+        let value = match &o {
+            TOption::Reference(r) => r.name.into(),
+            TOption::TPrimitive(p) => self.gen_primitive_type(&p).into(),
+            TOption::TMap(m) => self.gen_map(m),
+            TOption::TVec(v) => self.gen_vec(v),
+            TOption::TSet(s) => self.gen_set(s),
+        };
+        format!("Option<{}>", value)
+    }
+
+    fn gen_struct(&self, name: &str, s: &TStruct) -> String {
+        let mut fields = String::new();
+
+        for field in &s.fields {
+            let field_type = match &field.field_type {
+                StructFieldType::Reference(r) => r.name.into(),
+                StructFieldType::TMap(m) => self.gen_map(m),
+                StructFieldType::TOption(o) => self.gen_option(o),
+                StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
+                StructFieldType::TTuple(t) => self.gen_tuple(t),
+                StructFieldType::TVec(v) => self.gen_vec(v),
+            };
+
+            fields.push_str(&format!("\n    {}: {},", field.name, field_type));
+        }
+
+        format!(
+            "struct {} {{{}
+}}",
+            name, fields
+        )
+    }
+
+    fn gen_tuple(&self, t: &TTuple) -> String {
+        let mut values = String::new();
+
+        for (n, item) in t.items.iter().enumerate() {
+            let is_last = n == t.items.len() - 1;
+
+            let value = match item {
+                TupleItem::Reference(d) => d.name,
+                TupleItem::TPrimitive(p) => self.gen_primitive_type(p),
+            };
+
+            values.push_str(value);
+            if !is_last {
+                values.push_str(", ");
+            }
+        }
+
+        format!("({})", values)
+    }
+
+    fn gen_primitive_type(&self, ty: &TPrimitive) -> &'static str {
+        match ty {
+            TPrimitive::String => "String",
+            TPrimitive::Tbool => "bool",
+            TPrimitive::Ti64 => "i64",
+            TPrimitive::Tf64 => "f64",
+        }
     }
 }

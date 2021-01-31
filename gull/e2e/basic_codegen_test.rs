@@ -6,6 +6,16 @@ use gull::definitions::*;
 fn make_declarations() -> Declarations {
     let mut c = Declarations::new();
 
+    c.add(TypeDeclaration {
+        name: "Frame",
+        value: DeclarationValue::TTuple(TTuple {
+            items: vec![
+                TupleItem::TPrimitive(TPrimitive::String),
+                TupleItem::TPrimitive(TPrimitive::Ti64),
+            ],
+        }),
+    });
+
     let node_id = c.add(TypeDeclaration {
         name: "NodeID",
         value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
@@ -35,6 +45,13 @@ fn make_declarations() -> Declarations {
                         key: TPrimitive::Ti64,
                         value: TMapValue::Reference(graph_node),
                     }),
+                },
+                StructField {
+                    name: "string_fields",
+                    field_type: StructFieldType::TOption(TOption::TMap(TMap {
+                        key: TPrimitive::String,
+                        value: TMapValue::TPrimitive(TPrimitive::String),
+                    })),
                 },
             ],
         }),

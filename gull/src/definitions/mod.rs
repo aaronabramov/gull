@@ -11,6 +11,15 @@ pub enum TPrimitive {
 }
 
 #[derive(Debug, Clone)]
+pub enum TOption {
+    Reference(TypeDeclaration),
+    TMap(TMap),
+    TPrimitive(TPrimitive),
+    TSet(TSet),
+    TVec(TVec),
+}
+
+#[derive(Debug, Clone)]
 pub enum TVec {
     TPrimitive(TPrimitive),
     Reference(TypeDeclaration),
@@ -35,6 +44,17 @@ pub enum TMapValue {
 }
 
 #[derive(Debug, Clone)]
+pub struct TTuple {
+    pub items: Vec<TupleItem>,
+}
+
+#[derive(Debug, Clone)]
+pub enum TupleItem {
+    Reference(TypeDeclaration),
+    TPrimitive(TPrimitive),
+}
+
+#[derive(Debug, Clone)]
 pub struct TypeDeclaration {
     pub name: &'static str,
     pub value: DeclarationValue,
@@ -42,11 +62,10 @@ pub struct TypeDeclaration {
 
 #[derive(Debug, Clone)]
 pub enum DeclarationValue {
+    TMap(Box<TMap>),
     TPrimitive(TPrimitive),
     TStruct(TStruct),
-    TVec(Box<TVec>),
-    TSet(Box<TSet>),
-    TMap(Box<TMap>),
+    TTuple(TTuple),
 }
 
 #[derive(Debug, Clone)]
@@ -62,8 +81,20 @@ pub struct StructField {
 
 #[derive(Debug, Clone)]
 pub enum StructFieldType {
-    TMap(TMap),
-    TVec(TVec),
-    TPrimitive(TPrimitive),
     Reference(TypeDeclaration),
+    TMap(TMap),
+    TOption(TOption),
+    TPrimitive(TPrimitive),
+    TTuple(TTuple),
+    TVec(TVec),
 }
+
+// #[derive(Debug, Clone)]
+// pub struct TEnum {
+//     variants: Vec<EnumVariant>,
+// }
+
+// pub enum EnumVariant {
+//     Empty,
+//     Tuple(Vec<)
+// }
