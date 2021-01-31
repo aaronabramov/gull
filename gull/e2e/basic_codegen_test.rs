@@ -6,19 +6,38 @@ use gull::definitions::*;
 fn make_declarations() -> Declarations {
     let mut c = Declarations::new();
 
-    let node_id = c.add(TypeDeclaration::PrimitiveType {
+    let node_id = c.add(TypeDeclaration {
         name: "NodeID",
-        value: PrimitiveType::String,
+        value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
     });
 
-    c.add(TypeDeclaration::Struct {
+    let graph_node = c.add(TypeDeclaration {
         name: "GraphNode",
-        value: Struct {
+        value: DeclarationValue::TStruct(TStruct {
             fields: vec![StructField {
                 name: "node_id",
                 field_type: StructFieldType::Reference(node_id),
             }],
-        },
+        }),
+    });
+
+    c.add(TypeDeclaration {
+        name: "GraphData",
+        value: DeclarationValue::TStruct(TStruct {
+            fields: vec![
+                StructField {
+                    name: "entry_points",
+                    field_type: StructFieldType::TVec(TVec::TPrimitive(TPrimitive::Ti64)),
+                },
+                StructField {
+                    name: "nodes",
+                    field_type: StructFieldType::TMap(TMap {
+                        key: TPrimitive::Ti64,
+                        value: TMapValue::Reference(graph_node),
+                    }),
+                },
+            ],
+        }),
     });
 
     c

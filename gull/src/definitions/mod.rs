@@ -2,23 +2,56 @@ mod declarations;
 
 pub use declarations::Declarations;
 
-#[derive(Debug, Clone, Copy)]
-pub enum PrimitiveType {
+#[derive(Debug, Clone)]
+pub enum TPrimitive {
     String,
-    Ti32,
+    Ti64,
+    Tf64,
     Tbool,
 }
 
 #[derive(Debug, Clone)]
-pub enum TypeDeclaration {
-    PrimitiveType {
-        name: &'static str,
-        value: PrimitiveType,
-    },
-    Struct {
-        name: &'static str,
-        fields: Vec<StructField>,
-    },
+pub enum TVec {
+    TPrimitive(TPrimitive),
+    Reference(TypeDeclaration),
+}
+
+#[derive(Debug, Clone)]
+pub enum TSet {
+    TPrimitive(TPrimitive),
+    Reference(TypeDeclaration),
+}
+
+#[derive(Debug, Clone)]
+pub struct TMap {
+    pub key: TPrimitive,
+    pub value: TMapValue,
+}
+
+#[derive(Debug, Clone)]
+pub enum TMapValue {
+    TPrimitive(TPrimitive),
+    Reference(TypeDeclaration),
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeDeclaration {
+    pub name: &'static str,
+    pub value: DeclarationValue,
+}
+
+#[derive(Debug, Clone)]
+pub enum DeclarationValue {
+    TPrimitive(TPrimitive),
+    TStruct(TStruct),
+    TVec(Box<TVec>),
+    TSet(Box<TSet>),
+    TMap(Box<TMap>),
+}
+
+#[derive(Debug, Clone)]
+pub struct TStruct {
+    pub fields: Vec<StructField>,
 }
 
 #[derive(Debug, Clone)]
@@ -29,6 +62,8 @@ pub struct StructField {
 
 #[derive(Debug, Clone)]
 pub enum StructFieldType {
-    PrimitiveType(PrimitiveType),
+    TMap(TMap),
+    TVec(TVec),
+    TPrimitive(TPrimitive),
     Reference(TypeDeclaration),
 }

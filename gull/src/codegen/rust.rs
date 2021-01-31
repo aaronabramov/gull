@@ -1,5 +1,5 @@
 use super::Codegen;
-use crate::definitions::{PrimitiveType, StructField, StructFieldType, TypeDeclaration};
+use crate::definitions::*;
 use anyhow::Result;
 
 pub struct RustCodegen;
@@ -18,42 +18,76 @@ impl Codegen for RustCodegen {
 
         Ok(r)
     }
+
     fn gen_declaration(declaration: &TypeDeclaration) -> Result<String> {
-        let r = match declaration {
-            TypeDeclaration::PrimitiveType { name, value } => {
-                format!("type {} = {};", name, gen_primitive_type(value))
+        let r = match &declaration.value {
+            DeclarationValue::TPrimitive(p) => {
+                format!("type {} = {};", declaration.name, gen_primitive_type(p)).into()
             }
-            TypeDeclaration::Struct { name, fields } => {
-                format!(
-                    r#"struct {} {{ 
-{}
-}}"#,
-                    name,
-                    gen_struct_fields(fields)
-                )
-            }
+            DeclarationValue::TMap(m) => format!("type {} = {};", declaration.name, gen_map(m)),
+            DeclarationValue::TStruct(s) => gen_struct(declaration.name, s),
+            _ => panic!(format!("{:?}", declaration)),
         };
+        // TypeDeclaration::TPrimitive { name, value } => {
+        //                 format!("type {} = {};", name, gen_primitive_type(value))
+        //             }
+        //             TypeDeclaration::Struct { name, fields } => {
+        //                 format!(
+        //                     r#"struct {} {{
+        // {}
+        // }}"#,
+        //                     name,
+        //                     gen_struct_fields(fields)
+        //                 )
+        //             }
+        //         };
 
         Ok(r)
     }
 }
 
-fn gen_primitive_type(ty: &PrimitiveType) -> &'static str {
-    match ty {
-        PrimitiveType::String => "String",
-        PrimitiveType::Tbool => "bool",
-        PrimitiveType::Ti32 => "i32",
-    }
+fn gen_map(m: &TMap) -> String {
+    let value = match &m.value {
+        TMapValue::TPrimitive(p) => gen_primitive_type(p),
+        TMapValue::Reference(d) => d.name,
+    };
+    format!("BTreeMap<{}, {}>", gen_primitive_type(&m.key), value)
 }
 
-fn gen_struct_fields(fields: &[StructField]) -> String {
-    let mut r = String::new();
+fn gen_vec(v: &TVec) -> String {
+    let value = match &v {
+        TVec::TPrimitive(p) => gen_primitive_type(p),
+        TVec::Reference(d) => d.name,
+    };
+    format!("Vec<{}>", value)
+}
 
-    for field in fields {
-        let field_type = match field {};
+fn gen_struct(name: &str, s: &TStruct) -> String {
+    let mut fields = String::new();
 
-        r.push_str(&format!("    {}: {},", field.name, field_type));
+    for field in &s.fields {
+        let field_type = match &field.field_type {
+            StructFieldType::Reference(r) => r.name.into(),
+            StructFieldType::TPrimitive(p) => gen_primitive_type(&p).into(),
+            StructFieldType::TMap(m) => gen_map(m),
+            StructFieldType::TVec(v) => gen_vec(v),
+        };
+
+        fields.push_str(&format!("\n    {}: {},", field.name, field_type));
     }
 
-    r
+    format!(
+        "struct {} {{{}
+}}",
+        name, fields
+    )
+}
+
+fn gen_primitive_type(ty: &TPrimitive) -> &'static str {
+    match ty {
+        TPrimitive::String => "String",
+        TPrimitive::Tbool => "bool",
+        TPrimitive::Ti64 => "i64",
+        TPrimitive::Tf64 => "f64",
+    }
 }
