@@ -1,8 +1,10 @@
 use anyhow::Result;
-use gull::definitions::*;
+use gull::prelude::*;
 
 fn make_declarations() -> Declarations {
     let mut c = Declarations::new();
+
+    c.add_config(DeclarationsConfig::HackNamespace("GraphiteIngester"));
 
     let frame = c.add(TypeDeclaration {
         name: "Frame",
@@ -157,12 +159,12 @@ enum Operation {
 
 type NodeID = i64;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct GraphNode {
     node_id: NodeID,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 /// Wrapper value that represents a graph. It contains various top level
 /// data about the graph as well as a collection of nodes. This is a long
 /// multiline documentaino block that is here for testing purposes only. I'll also
@@ -203,35 +205,35 @@ fn hack_test() -> Result<()> {
     k9::snapshot!(
         declarations.codegen_hack()?,
         r#"
-
+<?hh // strict
 
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID
-type Frame = tuple(string, int);
+type GraphiteIngesterFrame = (string, int);
 
 // Operation is a single unit of transormation logic
 
-enum OperationType: string as string {
-    FETCH = "Fetch",
-    STORE = "Store",
-    DROP = "Drop",
+enum GraphiteIngesterOperationType: string as string {
+    FETCH = "Fetch";
+    STORE = "Store";
+    DROP = "Drop";
 }
 
-type Operation = shape(
-    'type' => OperationType,
+type GraphiteIngesterOperation = shape(
+    'type' => GraphiteIngesterOperationType,
     // Fetch items by their IDs
-    ?'Fetch' => ?tuple(int),
+    ?'Fetch' => (int),
     // Store graphs to a storage layer
-    ?'Store' => ? shape(
+    ?'Store' =>  shape(
         // Destination frames for the storage
-        'frames' => vec<Frame>,
+        'frames' => vec<GraphiteIngesterFrame>,
     ),
     // Discard all graphs
-    ?'Drop' => ?null,
+    ?'Drop' => null,
 );
 
-type NodeID = int;
+type GraphiteIngesterNodeID = int;
 
-type GraphNode = shape(
+type GraphiteIngesterGraphNode = shape(
     'node_id' => NodeID,
 );
 
@@ -252,10 +254,10 @@ type GraphNode = shape(
 // Some more docs after the ASCII drawings.
 // 
 // Maybe some extra line after a newline.
-type GraphData = shape(
+type GraphiteIngesterGraphData = shape(
     // Root nodes of the graph
     'entry_points' => vec<int>,
-    'nodes' => dict<int, GraphNode>,
+    'nodes' => dict<int, GraphiteIngesterGraphNode>,
     // A bunch of random string fields
     // that are represented as a map between string and string
     // and other important lines of documentation.

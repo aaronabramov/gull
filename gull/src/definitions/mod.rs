@@ -1,4 +1,4 @@
-mod declarations;
+pub mod declarations;
 
 pub use declarations::Declarations;
 

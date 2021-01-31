@@ -78,7 +78,6 @@ fn adjust_indentation(doc: &str) -> String {
         }
     }
 
-    dbg!(min_line_indent);
     match min_line_indent {
         None | Some(0) => doc.to_string(), // no changes needed
         Some(indent_to_trim) => {

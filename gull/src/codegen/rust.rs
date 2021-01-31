@@ -10,12 +10,12 @@ pub struct RustCodegen {
 }
 
 impl Codegen for RustCodegen {
-    fn gen_declarations(declarations: &Vec<TypeDeclaration>) -> Result<String> {
+    fn gen_declarations(declarations: &Declarations) -> Result<String> {
         let rc = RustCodegen::new();
 
         let mut declarations_code = String::new();
 
-        for declaration in declarations {
+        for declaration in &declarations.declarations {
             declarations_code.push('\n');
             declarations_code.push_str(&rc.gen_declaration(declaration)?);
             declarations_code.push('\n');
@@ -70,7 +70,7 @@ impl RustCodegen {
                 format!("type {} = {};", declaration.name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                prefix.push_str("#[derive(Debug, serde::Serialize, serde::Deserialize)\n");
+                prefix.push_str("#[derive(Debug, serde::Serialize, serde::Deserialize)]\n");
                 format!("struct {} {}", declaration.name, self.gen_struct(s, 0))
             }
             DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),

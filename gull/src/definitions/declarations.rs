@@ -4,14 +4,20 @@ use anyhow::Result;
 
 #[derive(Debug)]
 pub struct Declarations {
-    declarations: Vec<TypeDeclaration>,
+    pub(crate) declarations: Vec<TypeDeclaration>,
+    pub(crate) config: Vec<DeclarationsConfig>,
 }
 
 impl Declarations {
     pub fn new() -> Self {
         Declarations {
             declarations: vec![],
+            config: vec![],
         }
+    }
+
+    pub fn add_config(&mut self, config: DeclarationsConfig) {
+        self.config.push(config)
     }
 
     pub fn add(&mut self, type_declaration: TypeDeclaration) -> TypeDeclaration {
@@ -20,10 +26,16 @@ impl Declarations {
     }
 
     pub fn codegen_rust(&self) -> Result<String> {
-        RustCodegen::gen_declarations(&self.declarations)
+        RustCodegen::gen_declarations(&self)
     }
 
     pub fn codegen_hack(&self) -> Result<String> {
-        HackCodegen::gen_declarations(&self.declarations)
+        HackCodegen::gen_declarations(&self)
     }
+}
+
+#[derive(Debug)]
+pub enum DeclarationsConfig {
+    FileHeader(&'static str),
+    HackNamespace(&'static str),
 }
