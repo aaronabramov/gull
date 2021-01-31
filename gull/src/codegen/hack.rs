@@ -1,54 +1,54 @@
 use super::docs::{format_docstring, CommentStyle};
 use super::Codegen;
-use crate::definitions::*;
+use crate::prelude::*;
 use anyhow::Result;
 
-pub struct HackCodegen {}
+pub struct HackCodegen {
+    namespace: &'static str,
+}
 
 impl Codegen for HackCodegen {
-    fn gen_declarations(declarations: &Vec<TypeDeclaration>) -> Result<String> {
-        let rc = HackCodegen::new();
+    fn gen_declarations(declarations: &Declarations) -> Result<String> {
+        let mut rc = HackCodegen { namespace: "" };
 
-        let mut declarations_code = String::new();
+        let mut declarations_code = String::from("<?hh // strict\n");
 
-        for declaration in declarations {
+        for config in &declarations.config {
+            match config {
+                DeclarationsConfig::HackNamespace(namespace) => rc.namespace = namespace,
+                DeclarationsConfig::FileHeader(header) => {
+                    declarations_code.push_str(&format!("{}\n", header));
+                }
+            }
+        }
+
+        for declaration in &declarations.declarations {
             declarations_code.push('\n');
             declarations_code.push_str(&rc.gen_declaration(declaration)?);
             declarations_code.push('\n');
         }
 
-        let mut result = String::new();
-
-        result.push('\n');
-        result.push_str(&declarations_code);
-
-        Ok(result)
+        Ok(declarations_code)
     }
 }
 
 impl HackCodegen {
-    fn new() -> Self {
-        Self {}
-    }
-
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
+        let name = self.gen_name(&declaration);
         let mut r = match &declaration.value {
-            DeclarationValue::TPrimitive(p) => format!(
-                "type {} = {};",
-                declaration.name,
-                self.gen_primitive_type(p)
-            )
-            .into(),
+            DeclarationValue::TPrimitive(p) => {
+                format!("type {} = {};", name, self.gen_primitive_type(p)).into()
+            }
             DeclarationValue::TMap(m) => {
-                format!("type {} = {};", declaration.name, self.gen_map(m))
+                format!("type {} = {};", name, self.gen_map(m))
             }
             DeclarationValue::TTuple(t) => {
-                format!("type {} = {};", declaration.name, self.gen_tuple(t))
+                format!("type {} = {};", name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                format!("type {} = {};", declaration.name, self.gen_struct(s, 0))
+                format!("type {} = {};", name, self.gen_struct(s, 0))
             }
-            DeclarationValue::TEnum(e) => self.gen_enum(declaration.name, e),
+            DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
         };
 
         if let Some(doc) = format_docstring(declaration.docs, CommentStyle::DoubleSlash, 0) {
@@ -60,8 +60,8 @@ impl HackCodegen {
 
     fn gen_map(&self, m: &TMap) -> String {
         let value = match &m.value {
-            TMapValue::TPrimitive(p) => self.gen_primitive_type(p),
-            TMapValue::Reference(d) => d.name,
+            TMapValue::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
+            TMapValue::Reference(d) => self.gen_name(d),
         };
 
         format!("dict<{}, {}>", self.gen_primitive_type(&m.key), value)
@@ -69,16 +69,16 @@ impl HackCodegen {
 
     fn gen_vec(&self, v: &TVec) -> String {
         let value = match &v {
-            TVec::TPrimitive(p) => self.gen_primitive_type(p),
-            TVec::Reference(d) => d.name,
+            TVec::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
+            TVec::Reference(d) => self.gen_name(d),
         };
         format!("vec<{}>", value)
     }
 
     fn gen_set(&self, s: &TSet) -> String {
         let value = match &s {
-            TSet::TPrimitive(p) => self.gen_primitive_type(p),
-            TSet::Reference(d) => d.name,
+            TSet::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
+            TSet::Reference(d) => self.gen_name(d),
         };
 
         format!("keyset<{}>", value)
@@ -127,7 +127,7 @@ impl HackCodegen {
 
         for variant in &e.variants {
             variant_types.push(format!(
-                r#"    {} = "{}",{}"#,
+                r#"    {} = "{}";{}"#,
                 variant.name.to_uppercase(),
                 variant.name,
                 "\n"
@@ -153,7 +153,7 @@ impl HackCodegen {
                 EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
             };
 
-            variant_type = format!("\n    ?'{}' => ?{},", variant.name, variant_type);
+            variant_type = format!("\n    ?'{}' => {},", variant.name, variant_type);
 
             if let Some(doc) = format_docstring(variant.docs, CommentStyle::DoubleSlash, 4) {
                 variant_type = format!("\n{}{}", doc, variant_type);
@@ -178,17 +178,17 @@ type {} = shape({}\n);",
             let is_last = n == t.items.len() - 1;
 
             let value = match item {
-                TupleItem::Reference(d) => d.name,
-                TupleItem::TPrimitive(p) => self.gen_primitive_type(p),
+                TupleItem::Reference(d) => self.gen_name(d),
+                TupleItem::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
             };
 
-            values.push_str(value);
+            values.push_str(&value);
             if !is_last {
                 values.push_str(", ");
             }
         }
 
-        format!("tuple({})", values)
+        format!("({})", values)
     }
 
     fn gen_primitive_type(&self, ty: &TPrimitive) -> &'static str {
@@ -198,5 +198,9 @@ type {} = shape({}\n);",
             TPrimitive::Ti64 => "int",
             TPrimitive::Tf64 => "float",
         }
+    }
+
+    fn gen_name(&self, d: &TypeDeclaration) -> String {
+        format!("{}{}", self.namespace, d.name)
     }
 }

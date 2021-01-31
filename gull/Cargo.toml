@@ -11,9 +11,11 @@ repository = "https://github.com/aaronabramov/gull"
 
 [dependencies]
 anyhow = "1.0"
+colored = "2"
+diff = "0.1"
 docblock = { path = "../docblock" }
-sha2 = "0.9.1"
 hex = "0.4.2"
+sha2 = "0.9.1"
 
 [dev-dependencies]
 k9 = "*"
