@@ -1,3 +1,4 @@
+mod docs;
 mod hack;
 mod rust;
 

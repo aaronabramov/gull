@@ -1,3 +1,4 @@
+use super::docs::{format_docstring, CommentStyle};
 use super::Codegen;
 use crate::definitions::*;
 use anyhow::Result;
@@ -45,7 +46,7 @@ impl RustCodegen {
     }
 
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
-        let r = match &declaration.value {
+        let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => format!(
                 "type {} = {};",
                 declaration.name,
@@ -63,6 +64,10 @@ impl RustCodegen {
             }
             DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),
         };
+
+        if let Some(doc) = format_docstring(declaration.docs, CommentStyle::TripleSlash, 0) {
+            r = format!("{}\n{}", doc, r);
+        }
 
         Ok(r)
     }

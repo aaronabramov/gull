@@ -6,6 +6,7 @@ fn make_declarations() -> Declarations {
 
     let frame = c.add(TypeDeclaration {
         name: "Frame",
+        docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
         value: DeclarationValue::TTuple(TTuple {
             items: vec![
                 TupleItem::TPrimitive(TPrimitive::String),
@@ -16,6 +17,7 @@ fn make_declarations() -> Declarations {
 
     c.add(TypeDeclaration {
         name: "Operation",
+        docs: "Operation is a single unit of transormation logic",
         value: DeclarationValue::TEnum(TEnum {
             variants: vec![
                 EnumVariant {
@@ -43,11 +45,13 @@ fn make_declarations() -> Declarations {
 
     let node_id = c.add(TypeDeclaration {
         name: "NodeID",
+        docs: "",
         value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
     });
 
     let graph_node = c.add(TypeDeclaration {
         name: "GraphNode",
+        docs: "",
         value: DeclarationValue::TStruct(TStruct {
             fields: vec![StructField {
                 name: "node_id",
@@ -58,6 +62,24 @@ fn make_declarations() -> Declarations {
 
     c.add(TypeDeclaration {
         name: "GraphData",
+        docs: r#"Wrapper value that represents a graph. It contains various top level
+        data about the graph as well as a collection of nodes. This is a long
+        multiline documentaino block that is here for testing purposes only. I'll also
+        add some Ascii diagram just to make sure nothing gets misalligned.
+
+            $> SELECT name, age, hometown, credit_card_number FROM users
+
+            +----------+-----+-------------+----------------+
+            | Name     | Age | Location    | Credit Card    |
+            +----------+-----+-------------+----------------+
+            | Bobby    | 17  | El Paso, TX | 1234 4294 2492 |
+            | Hannah   | 20  | Memphis, TN | 9494 2492 4024 |
+            +----------+-----+-------------+----------------+
+        
+        Some more docs after the ASCII drawings.
+
+        Maybe some extra line after a newline.
+        "#,
         value: DeclarationValue::TStruct(TStruct {
             fields: vec![
                 StructField {
@@ -90,12 +112,14 @@ fn rust_test() -> Result<()> {
     let declarations = make_declarations();
     k9::snapshot!(
         declarations.codegen_rust()?,
-        "
+        r"
 use std::collections::BTreeMap;
 
 
+/// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type Frame = (String, i64);
 
+/// Operation is a single unit of transormation logic
 enum Operation {
   Fetch(i64),
   Store {
@@ -110,6 +134,23 @@ struct GraphNode {
     node_id: NodeID,
 }
 
+/// Wrapper value that represents a graph. It contains various top level
+/// data about the graph as well as a collection of nodes. This is a long
+/// multiline documentaino block that is here for testing purposes only. I'll also
+/// add some Ascii diagram just to make sure nothing gets misalligned.
+/// 
+///     $> SELECT name, age, hometown, credit_card_number FROM users
+/// 
+///     +----------+-----+-------------+----------------+
+///     | Name     | Age | Location    | Credit Card    |
+///     +----------+-----+-------------+----------------+
+///     | Bobby    | 17  | El Paso, TX | 1234 4294 2492 |
+///     | Hannah   | 20  | Memphis, TN | 9494 2492 4024 |
+///     +----------+-----+-------------+----------------+
+/// 
+/// Some more docs after the ASCII drawings.
+/// 
+/// Maybe some extra line after a newline.
 struct GraphData {
     entry_points: Vec<i64>,
     nodes: BTreeMap<i64, GraphNode>,
@@ -130,8 +171,10 @@ fn hack_test() -> Result<()> {
         r#"
 
 
+// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type Frame = tuple(string, int);
 
+// Operation is a single unit of transormation logic
 
 enum OperationType: string as string {
     FETCH = "Fetch",
@@ -153,6 +196,23 @@ type GraphNode = shape(
     'node_id' => NodeID,
 );
 
+// Wrapper value that represents a graph. It contains various top level
+// data about the graph as well as a collection of nodes. This is a long
+// multiline documentaino block that is here for testing purposes only. I'll also
+// add some Ascii diagram just to make sure nothing gets misalligned.
+// 
+//     $> SELECT name, age, hometown, credit_card_number FROM users
+// 
+//     +----------+-----+-------------+----------------+
+//     | Name     | Age | Location    | Credit Card    |
+//     +----------+-----+-------------+----------------+
+//     | Bobby    | 17  | El Paso, TX | 1234 4294 2492 |
+//     | Hannah   | 20  | Memphis, TN | 9494 2492 4024 |
+//     +----------+-----+-------------+----------------+
+// 
+// Some more docs after the ASCII drawings.
+// 
+// Maybe some extra line after a newline.
 type GraphData = shape(
     'entry_points' => vec<int>,
     'nodes' => dict<int, GraphNode>,
