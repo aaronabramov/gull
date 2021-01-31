@@ -62,6 +62,7 @@ pub struct TypeDeclaration {
 
 #[derive(Debug, Clone)]
 pub enum DeclarationValue {
+    TEnum(TEnum),
     TMap(Box<TMap>),
     TPrimitive(TPrimitive),
     TStruct(TStruct),
@@ -89,12 +90,20 @@ pub enum StructFieldType {
     TVec(TVec),
 }
 
-// #[derive(Debug, Clone)]
-// pub struct TEnum {
-//     variants: Vec<EnumVariant>,
-// }
+#[derive(Debug, Clone)]
+pub struct TEnum {
+    pub variants: Vec<EnumVariant>,
+}
 
-// pub enum EnumVariant {
-//     Empty,
-//     Tuple(Vec<)
-// }
+#[derive(Debug, Clone)]
+pub struct EnumVariant {
+    pub name: &'static str,
+    pub variant_type: EnumVariantType,
+}
+
+#[derive(Debug, Clone)]
+pub enum EnumVariantType {
+    Empty,
+    Tuple(TTuple),
+    Struct(TStruct),
+}

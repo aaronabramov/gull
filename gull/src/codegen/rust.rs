@@ -58,7 +58,10 @@ impl RustCodegen {
             DeclarationValue::TTuple(t) => {
                 format!("type {} = {};", declaration.name, self.gen_tuple(t))
             }
-            DeclarationValue::TStruct(s) => self.gen_struct(declaration.name, s),
+            DeclarationValue::TStruct(s) => {
+                format!("struct {} {}", declaration.name, self.gen_struct(s))
+            }
+            DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),
         };
 
         Ok(r)
@@ -103,7 +106,7 @@ impl RustCodegen {
         format!("Option<{}>", value)
     }
 
-    fn gen_struct(&self, name: &str, s: &TStruct) -> String {
+    fn gen_struct(&self, s: &TStruct) -> String {
         let mut fields = String::new();
 
         for field in &s.fields {
@@ -119,11 +122,23 @@ impl RustCodegen {
             fields.push_str(&format!("\n    {}: {},", field.name, field_type));
         }
 
-        format!(
-            "struct {} {{{}
-}}",
-            name, fields
-        )
+        format!("{{{}\n}}", fields)
+    }
+
+    fn gen_enum(&self, e: &TEnum) -> String {
+        let mut variants = String::new();
+
+        for variant in &e.variants {
+            let variant_type = match &variant.variant_type {
+                EnumVariantType::Empty => "".into(),
+                EnumVariantType::Tuple(t) => self.gen_tuple(t),
+                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s)),
+            };
+
+            variants.push_str(&format!("\n  {}{},", variant.name, variant_type));
+        }
+
+        format!("{{{}\n}}", variants)
     }
 
     fn gen_tuple(&self, t: &TTuple) -> String {

@@ -6,12 +6,39 @@ use gull::definitions::*;
 fn make_declarations() -> Declarations {
     let mut c = Declarations::new();
 
-    c.add(TypeDeclaration {
+    let frame = c.add(TypeDeclaration {
         name: "Frame",
         value: DeclarationValue::TTuple(TTuple {
             items: vec![
                 TupleItem::TPrimitive(TPrimitive::String),
                 TupleItem::TPrimitive(TPrimitive::Ti64),
+            ],
+        }),
+    });
+
+    c.add(TypeDeclaration {
+        name: "Operation",
+        value: DeclarationValue::TEnum(TEnum {
+            variants: vec![
+                EnumVariant {
+                    name: "Fetch",
+                    variant_type: EnumVariantType::Tuple(TTuple {
+                        items: vec![TupleItem::TPrimitive(TPrimitive::Ti64)],
+                    }),
+                },
+                EnumVariant {
+                    name: "Store",
+                    variant_type: EnumVariantType::Struct(TStruct {
+                        fields: vec![StructField {
+                            name: "frames",
+                            field_type: StructFieldType::TVec(TVec::Reference(frame)),
+                        }],
+                    }),
+                },
+                EnumVariant {
+                    name: "Drop",
+                    variant_type: EnumVariantType::Empty,
+                },
             ],
         }),
     });
