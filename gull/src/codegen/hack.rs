@@ -149,8 +149,7 @@ impl HackCodegen {
             "
 {}
 
-type {} = shape({}\n)
-",
+type {} = shape({}\n);",
             variant_type_hack_enum, name, variants
         )
     }

@@ -1,5 +1,3 @@
-// use gull::codegen::{ Rust};
-use crate::project::Project;
 use anyhow::Result;
 use gull::definitions::*;
 
@@ -127,7 +125,42 @@ struct GraphData {
 #[test]
 fn hack_test() -> Result<()> {
     let declarations = make_declarations();
-    k9::snapshot!(declarations.codegen_hack()?, "");
+    k9::snapshot!(
+        declarations.codegen_hack()?,
+        r#"
+
+
+type Frame = tuple(string, int);
+
+
+enum OperationType: string as string {
+    FETCH = "Fetch",
+    STORE = "Store",
+    DROP = "Drop",
+}
+
+type Operation = shape(
+    'type' => OperationType,
+    ?'Fetch' => ?tuple(int),
+    ?'Store' => ? shape(
+    'frames' => vec<Frame>,
+),
+);
+
+type NodeID = int;
+
+type GraphNode = shape(
+    'node_id' => NodeID,
+);
+
+type GraphData = shape(
+    'entry_points' => vec<int>,
+    'nodes' => dict<int, GraphNode>,
+    'string_fields' => ?dict<string, string>,
+);
+
+"#
+    );
 
     Ok(())
 }
