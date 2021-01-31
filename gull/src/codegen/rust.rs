@@ -114,7 +114,7 @@ impl RustCodegen {
     fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
         let mut fields = String::new();
 
-        let indent = " ".repeat(indent);
+        let prefix = " ".repeat(indent);
 
         for field in &s.fields {
             let field_type = match &field.field_type {
@@ -126,23 +126,34 @@ impl RustCodegen {
                 StructFieldType::TVec(v) => self.gen_vec(v),
             };
 
-            fields.push_str(&format!("\n    {}{}: {},", &indent, field.name, field_type));
+            let mut field_str = format!("\n    {}{}: {},", &prefix, field.name, field_type);
+
+            if let Some(doc) = format_docstring(field.docs, CommentStyle::TripleSlash, indent + 4) {
+                field_str = format!("\n{}{}", doc, field_str);
+            }
+
+            fields.push_str(&field_str);
         }
 
-        format!("{{{}\n{}}}", fields, indent)
+        format!("{{{}\n{}}}", fields, prefix)
     }
 
     fn gen_enum(&self, e: &TEnum) -> String {
         let mut variants = String::new();
 
         for variant in &e.variants {
-            let variant_type = match &variant.variant_type {
+            let mut variant_type = match &variant.variant_type {
                 EnumVariantType::Empty => "".into(),
                 EnumVariantType::Tuple(t) => self.gen_tuple(t),
                 EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
             };
 
-            variants.push_str(&format!("\n  {}{},", variant.name, variant_type));
+            variant_type = format!("\n    {}{},", variant.name, variant_type);
+            if let Some(doc) = format_docstring(variant.docs, CommentStyle::TripleSlash, 4) {
+                variant_type = format!("\n{}{}", doc, variant_type);
+            }
+
+            variants.push_str(&variant_type);
         }
 
         format!("{{{}\n}}", variants)

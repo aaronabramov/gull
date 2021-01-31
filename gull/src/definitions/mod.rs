@@ -78,6 +78,7 @@ pub struct TStruct {
 #[derive(Debug, Clone)]
 pub struct StructField {
     pub name: &'static str,
+    pub docs: &'static str,
     pub field_type: StructFieldType,
 }
 
@@ -99,6 +100,7 @@ pub struct TEnum {
 #[derive(Debug, Clone)]
 pub struct EnumVariant {
     pub name: &'static str,
+    pub docs: &'static str,
     pub variant_type: EnumVariantType,
 }
 

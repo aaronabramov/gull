@@ -22,21 +22,25 @@ fn make_declarations() -> Declarations {
             variants: vec![
                 EnumVariant {
                     name: "Fetch",
+                    docs: "Fetch items by their IDs",
                     variant_type: EnumVariantType::Tuple(TTuple {
                         items: vec![TupleItem::TPrimitive(TPrimitive::Ti64)],
                     }),
                 },
                 EnumVariant {
                     name: "Store",
+                    docs: "Store graphs to a storage layer",
                     variant_type: EnumVariantType::Struct(TStruct {
                         fields: vec![StructField {
                             name: "frames",
+                            docs: "Destination frames for the storage",
                             field_type: StructFieldType::TVec(TVec::Reference(frame)),
                         }],
                     }),
                 },
                 EnumVariant {
                     name: "Drop",
+                    docs: "Discard all graphs",
                     variant_type: EnumVariantType::Empty,
                 },
             ],
@@ -55,6 +59,7 @@ fn make_declarations() -> Declarations {
         value: DeclarationValue::TStruct(TStruct {
             fields: vec![StructField {
                 name: "node_id",
+                docs: "",
                 field_type: StructFieldType::Reference(node_id),
             }],
         }),
@@ -84,10 +89,12 @@ fn make_declarations() -> Declarations {
             fields: vec![
                 StructField {
                     name: "entry_points",
+                    docs: "Root nodes of the graph",
                     field_type: StructFieldType::TVec(TVec::TPrimitive(TPrimitive::Ti64)),
                 },
                 StructField {
                     name: "nodes",
+                    docs: "",
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::Ti64,
                         value: TMapValue::Reference(graph_node),
@@ -95,6 +102,7 @@ fn make_declarations() -> Declarations {
                 },
                 StructField {
                     name: "string_fields",
+                    docs: "",
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
                         key: TPrimitive::String,
                         value: TMapValue::TPrimitive(TPrimitive::String),
@@ -121,11 +129,15 @@ type Frame = (String, i64);
 
 /// Operation is a single unit of transormation logic
 enum Operation {
-  Fetch(i64),
-  Store {
+    /// Fetch items by their IDs
+    Fetch(i64),
+    /// Store graphs to a storage layer
+    Store {
+        /// Destination frames for the storage
         frames: Vec<Frame>,
     },
-  Drop,
+    /// Discard all graphs
+    Drop,
 }
 
 type NodeID = i64;
@@ -152,6 +164,7 @@ struct GraphNode {
 /// 
 /// Maybe some extra line after a newline.
 struct GraphData {
+    /// Root nodes of the graph
     entry_points: Vec<i64>,
     nodes: BTreeMap<i64, GraphNode>,
     string_fields: Option<BTreeMap<String, String>>,
@@ -184,10 +197,15 @@ enum OperationType: string as string {
 
 type Operation = shape(
     'type' => OperationType,
+    // Fetch items by their IDs
     ?'Fetch' => ?tuple(int),
+    // Store graphs to a storage layer
     ?'Store' => ? shape(
+        // Destination frames for the storage
         'frames' => vec<Frame>,
     ),
+    // Discard all graphs
+    ?'Drop' => ?null,
 );
 
 type NodeID = int;
@@ -214,6 +232,7 @@ type GraphNode = shape(
 // 
 // Maybe some extra line after a newline.
 type GraphData = shape(
+    // Root nodes of the graph
     'entry_points' => vec<int>,
     'nodes' => dict<int, GraphNode>,
     'string_fields' => ?dict<string, string>,
