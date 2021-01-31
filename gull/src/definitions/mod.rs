@@ -59,6 +59,12 @@ pub struct TypeDeclaration {
     pub name: &'static str,
     pub docs: &'static str,
     pub value: DeclarationValue,
+    pub config: Vec<TypeDeclarationConfig>,
+}
+
+#[derive(Debug, Clone)]
+pub enum TypeDeclarationConfig {
+    RustAttribute(&'static str),
 }
 
 #[derive(Debug, Clone)]
@@ -78,7 +84,14 @@ pub struct TStruct {
 #[derive(Debug, Clone)]
 pub struct StructField {
     pub name: &'static str,
+    pub docs: &'static str,
     pub field_type: StructFieldType,
+    pub config: Vec<StructFieldConfig>,
+}
+
+#[derive(Debug, Clone)]
+pub enum StructFieldConfig {
+    RustAttribute(&'static str),
 }
 
 #[derive(Debug, Clone)]
@@ -99,6 +112,7 @@ pub struct TEnum {
 #[derive(Debug, Clone)]
 pub struct EnumVariant {
     pub name: &'static str,
+    pub docs: &'static str,
     pub variant_type: EnumVariantType,
 }
 

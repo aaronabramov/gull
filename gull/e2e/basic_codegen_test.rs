@@ -7,6 +7,7 @@ fn make_declarations() -> Declarations {
     let frame = c.add(TypeDeclaration {
         name: "Frame",
         docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
+        config: vec![TypeDeclarationConfig::RustAttribute("#[derive(Copy)]")],
         value: DeclarationValue::TTuple(TTuple {
             items: vec![
                 TupleItem::TPrimitive(TPrimitive::String),
@@ -18,25 +19,31 @@ fn make_declarations() -> Declarations {
     c.add(TypeDeclaration {
         name: "Operation",
         docs: "Operation is a single unit of transormation logic",
+        config: vec![],
         value: DeclarationValue::TEnum(TEnum {
             variants: vec![
                 EnumVariant {
                     name: "Fetch",
+                    docs: "Fetch items by their IDs",
                     variant_type: EnumVariantType::Tuple(TTuple {
                         items: vec![TupleItem::TPrimitive(TPrimitive::Ti64)],
                     }),
                 },
                 EnumVariant {
                     name: "Store",
+                    docs: "Store graphs to a storage layer",
                     variant_type: EnumVariantType::Struct(TStruct {
                         fields: vec![StructField {
                             name: "frames",
+                            docs: "Destination frames for the storage",
+                            config: vec![],
                             field_type: StructFieldType::TVec(TVec::Reference(frame)),
                         }],
                     }),
                 },
                 EnumVariant {
                     name: "Drop",
+                    docs: "Discard all graphs",
                     variant_type: EnumVariantType::Empty,
                 },
             ],
@@ -46,15 +53,19 @@ fn make_declarations() -> Declarations {
     let node_id = c.add(TypeDeclaration {
         name: "NodeID",
         docs: "",
+        config: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
     });
 
     let graph_node = c.add(TypeDeclaration {
         name: "GraphNode",
         docs: "",
+        config: vec![],
         value: DeclarationValue::TStruct(TStruct {
             fields: vec![StructField {
                 name: "node_id",
+                docs: "",
+                config: vec![],
                 field_type: StructFieldType::Reference(node_id),
             }],
         }),
@@ -80,14 +91,19 @@ fn make_declarations() -> Declarations {
 
         Maybe some extra line after a newline.
         "#,
+        config: vec![],
         value: DeclarationValue::TStruct(TStruct {
             fields: vec![
                 StructField {
                     name: "entry_points",
+                    docs: "Root nodes of the graph",
+                    config: vec![],
                     field_type: StructFieldType::TVec(TVec::TPrimitive(TPrimitive::Ti64)),
                 },
                 StructField {
                     name: "nodes",
+                    docs: "",
+                    config: vec![],
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::Ti64,
                         value: TMapValue::Reference(graph_node),
@@ -95,6 +111,12 @@ fn make_declarations() -> Declarations {
                 },
                 StructField {
                     name: "string_fields",
+                    docs: "A bunch of random string fields
+                    that are represented as a map between string and string
+                    and other important lines of documentation.",
+                    config: vec![StructFieldConfig::RustAttribute(
+                        r#"#[serde(skip_serializing_if = "Option::is_none")]"#,
+                    )],
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
                         key: TPrimitive::String,
                         value: TMapValue::TPrimitive(TPrimitive::String),
@@ -112,28 +134,35 @@ fn rust_test() -> Result<()> {
     let declarations = make_declarations();
     k9::snapshot!(
         declarations.codegen_rust()?,
-        r"
+        r#"
 use std::collections::BTreeMap;
 
 
+#[derive(Copy)]
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type Frame = (String, i64);
 
 /// Operation is a single unit of transormation logic
 enum Operation {
-  Fetch(i64),
-  Store {
+    /// Fetch items by their IDs
+    Fetch(i64),
+    /// Store graphs to a storage layer
+    Store {
+        /// Destination frames for the storage
         frames: Vec<Frame>,
     },
-  Drop,
+    /// Discard all graphs
+    Drop,
 }
 
 type NodeID = i64;
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)
 struct GraphNode {
     node_id: NodeID,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)
 /// Wrapper value that represents a graph. It contains various top level
 /// data about the graph as well as a collection of nodes. This is a long
 /// multiline documentaino block that is here for testing purposes only. I'll also
@@ -152,12 +181,17 @@ struct GraphNode {
 /// 
 /// Maybe some extra line after a newline.
 struct GraphData {
+    /// Root nodes of the graph
     entry_points: Vec<i64>,
     nodes: BTreeMap<i64, GraphNode>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// A bunch of random string fields
+    /// that are represented as a map between string and string
+    /// and other important lines of documentation.
     string_fields: Option<BTreeMap<String, String>>,
 }
 
-"
+"#
     );
 
     Ok(())
@@ -184,10 +218,15 @@ enum OperationType: string as string {
 
 type Operation = shape(
     'type' => OperationType,
+    // Fetch items by their IDs
     ?'Fetch' => ?tuple(int),
+    // Store graphs to a storage layer
     ?'Store' => ? shape(
+        // Destination frames for the storage
         'frames' => vec<Frame>,
     ),
+    // Discard all graphs
+    ?'Drop' => ?null,
 );
 
 type NodeID = int;
@@ -214,8 +253,12 @@ type GraphNode = shape(
 // 
 // Maybe some extra line after a newline.
 type GraphData = shape(
+    // Root nodes of the graph
     'entry_points' => vec<int>,
     'nodes' => dict<int, GraphNode>,
+    // A bunch of random string fields
+    // that are represented as a map between string and string
+    // and other important lines of documentation.
     'string_fields' => ?dict<string, string>,
 );
 

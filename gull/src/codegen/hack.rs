@@ -98,10 +98,10 @@ impl HackCodegen {
     fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
         let mut fields = String::new();
 
-        let indent = " ".repeat(indent);
+        let prefix = " ".repeat(indent);
 
         for field in &s.fields {
-            let field_type = match &field.field_type {
+            let mut field_type = match &field.field_type {
                 StructFieldType::Reference(r) => r.name.into(),
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TOption(o) => self.gen_option(o),
@@ -110,13 +110,16 @@ impl HackCodegen {
                 StructFieldType::TVec(v) => self.gen_vec(v),
             };
 
-            fields.push_str(&format!(
-                "\n    {}'{}' => {},",
-                &indent, field.name, field_type
-            ));
+            field_type = format!("\n    {}'{}' => {},", &prefix, field.name, field_type);
+
+            if let Some(doc) = format_docstring(field.docs, CommentStyle::DoubleSlash, indent + 4) {
+                field_type = format!("\n{}{}", doc, field_type);
+            }
+
+            fields.push_str(&field_type);
         }
 
-        format!("shape({}\n{})", fields, indent)
+        format!("shape({}\n{})", fields, prefix)
     }
 
     fn gen_enum(&self, name: &str, e: &TEnum) -> String {
@@ -144,15 +147,19 @@ impl HackCodegen {
         variants.push_str(&format!("\n    'type' => {},", variant_type_enum_name));
 
         for variant in &e.variants {
-            let variant_type = match &variant.variant_type {
-                EnumVariantType::Empty => None,
-                EnumVariantType::Tuple(t) => Some(self.gen_tuple(t)),
-                EnumVariantType::Struct(s) => Some(format!(" {}", self.gen_struct(s, 4))),
+            let mut variant_type = match &variant.variant_type {
+                EnumVariantType::Empty => "null".to_string(),
+                EnumVariantType::Tuple(t) => self.gen_tuple(t),
+                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
             };
 
-            if let Some(variant_type) = variant_type {
-                variants.push_str(&format!("\n    ?'{}' => ?{},", variant.name, variant_type));
+            variant_type = format!("\n    ?'{}' => ?{},", variant.name, variant_type);
+
+            if let Some(doc) = format_docstring(variant.docs, CommentStyle::DoubleSlash, 4) {
+                variant_type = format!("\n{}{}", doc, variant_type);
             }
+
+            variants.push_str(&variant_type);
         }
 
         format!(
