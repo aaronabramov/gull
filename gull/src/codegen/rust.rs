@@ -127,7 +127,7 @@ impl RustCodegen {
 
         let indent = " ".repeat(indent_level);
 
-        for (i, field) in s.fields.iter().enumerate() {
+        for field in s.fields.iter() {
             let mut field_prefix = String::new();
 
             for config in &field.config {
