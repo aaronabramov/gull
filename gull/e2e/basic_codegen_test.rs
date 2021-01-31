@@ -92,36 +92,35 @@ fn basic_test() -> Result<()> {
     let p = Project::new("basic_codegen_test")?;
 
     let declarations = make_declarations();
-    k9::snapshot!(declarations.codegen_rust()?, "");
-
     k9::snapshot!(
-        declarations,
-        r#"
-Declarations {
-    declarations: [
-        PrimitiveType {
-            name: "NodeID",
-            value: String,
-        },
-        Struct {
-            name: "GraphNode",
-            value: Struct {
-                fields: [
-                    StructField {
-                        name: "node_id",
-                        field_type: Reference(
-                            PrimitiveType {
-                                name: "NodeID",
-                                value: String,
-                            },
-                        ),
-                    },
-                ],
-            },
-        },
-    ],
+        declarations.codegen_rust()?,
+        "
+use std::collections::BTreeMap;
+
+
+type Frame = (String, i64);
+
+enum Operation {
+  Fetch(i64),
+  Store {
+    frames: Vec<Frame>,
+},
+  Drop,
 }
-"#
+
+type NodeID = i64;
+
+struct GraphNode {
+    node_id: NodeID,
+}
+
+struct GraphData {
+    entry_points: Vec<i64>,
+    nodes: BTreeMap<i64, GraphNode>,
+    string_fields: Option<BTreeMap<String, String>>,
+}
+
+"
     );
 
     Ok(())

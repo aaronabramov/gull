@@ -7,8 +7,6 @@ pub struct Declarations {
     declarations: Vec<TypeDeclaration>,
 }
 
-#[allow(renamed_and_removed_lints)]
-#[allow(new_without_default)]
 impl Declarations {
     pub fn new() -> Self {
         Declarations {
