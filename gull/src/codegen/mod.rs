@@ -1,10 +1,12 @@
 mod docs;
+mod flow;
 mod hack;
 mod rust;
 
 use crate::definitions::Declarations;
 use anyhow::Result;
 
+pub use flow::FlowCodegen;
 pub use hack::HackCodegen;
 pub use rust::RustCodegen;
 
