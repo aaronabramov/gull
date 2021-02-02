@@ -86,7 +86,7 @@ impl HackCodegen {
 
     fn gen_option(&self, o: &TOption) -> String {
         let value = match &o {
-            TOption::Reference(r) => r.name.into(),
+            TOption::Reference(r) => self.gen_name(r),
             TOption::TPrimitive(p) => self.gen_primitive_type(&p).into(),
             TOption::TMap(m) => self.gen_map(m),
             TOption::TVec(v) => self.gen_vec(v),
@@ -102,7 +102,7 @@ impl HackCodegen {
 
         for field in &s.fields {
             let mut field_type = match &field.field_type {
-                StructFieldType::Reference(r) => r.name.into(),
+                StructFieldType::Reference(r) => self.gen_name(r),
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TOption(o) => self.gen_option(o),
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
