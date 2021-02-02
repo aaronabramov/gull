@@ -127,6 +127,13 @@ impl SourceFile {
         }
     }
 
+    // Add text to docblock.
+    pub fn add_text(&mut self, text: &str) {
+        for line in text.lines() {
+            self.doc_block.push(Line::Text(line.to_string()))
+        }
+    }
+
     pub fn to_source(&self) -> String {
         let mut result = String::new();
 
@@ -178,6 +185,14 @@ use a::b::c;
         source_file.set_directive("hi", Some("hello"));
         source_file.set_directive("hello", Some("bro"));
         source_file.set_directive("ohio", None);
+        source_file.add_text(
+            "
+Empty line followed by some text. That
+spans across multiple lines.
+
+And also hase some empty lines in between text
+blocks.",
+        );
 
         snapshot!(
             source_file.to_source(),
@@ -188,6 +203,12 @@ use a::b::c;
  * @hi hello
  * @ohio
  * yo
+ * 
+ * Empty line followed by some text. That
+ * spans across multiple lines.
+ * 
+ * And also hase some empty lines in between text
+ * blocks.
  */
 
 use a::b::c;

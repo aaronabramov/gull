@@ -6,6 +6,16 @@ fn make_declarations() -> Declarations {
 
     c.add_config(DeclarationsConfig::HackNamespace("GraphiteIngester"));
 
+    c.add(TypeDeclaration {
+        name: "",
+        docs: "Hello world
+        ==========================================================================
+        THIS IS AN INDEPENDENT DOCUMENTATION BLOCK
+        ==========================================================================",
+        config: vec![],
+        value: DeclarationValue::Docs,
+    });
+
     let frame = c.add(TypeDeclaration {
         name: "Frame",
         docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
@@ -140,6 +150,12 @@ fn rust_test() -> Result<()> {
 use std::collections::BTreeMap;
 
 
+/// Hello world
+/// ==========================================================================
+/// THIS IS AN INDEPENDENT DOCUMENTATION BLOCK
+/// ==========================================================================
+
+
 #[derive(Copy)]
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type Frame = (String, i64);
@@ -206,6 +222,12 @@ fn hack_test() -> Result<()> {
         declarations.codegen_hack()?,
         r#"
 <?hh // strict
+
+// Hello world
+// ==========================================================================
+// THIS IS AN INDEPENDENT DOCUMENTATION BLOCK
+// ==========================================================================
+
 
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type GraphiteIngesterFrame = (string, int);
@@ -280,6 +302,12 @@ fn flow_test() -> Result<()> {
  * @flow
  * @nolint
  */
+
+
+// Hello world
+// ==========================================================================
+// THIS IS AN INDEPENDENT DOCUMENTATION BLOCK
+// ==========================================================================
 
 
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID

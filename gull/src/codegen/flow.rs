@@ -53,6 +53,7 @@ impl FlowCodegen {
                 format!("export type {} = {};", name, self.gen_struct(s, 0))
             }
             DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
+            DeclarationValue::Docs => String::new(),
         };
 
         if let Some(doc) = format_docstring(declaration.docs, CommentStyle::DoubleSlash, 0) {

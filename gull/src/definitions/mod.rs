@@ -74,6 +74,7 @@ pub enum DeclarationValue {
     TPrimitive(TPrimitive),
     TStruct(TStruct),
     TTuple(TTuple),
+    Docs,
 }
 
 #[derive(Debug, Clone)]
