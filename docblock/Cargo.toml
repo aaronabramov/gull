@@ -1,6 +1,6 @@
 [package]
 name = "docblock"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["Aaron Abramov <dabramov@fb.com>"]
 edition = "2018"
 description = "type generation"
