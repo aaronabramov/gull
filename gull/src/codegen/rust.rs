@@ -77,7 +77,13 @@ impl RustCodegen {
             DeclarationValue::Docs => String::new(),
         };
 
-        if let Some(doc) = format_docstring(declaration.docs, CommentStyle::TripleSlash, 0) {
+        let comment_style = if let DeclarationValue::Docs = declaration.value {
+            CommentStyle::DoubleSlash
+        } else {
+            CommentStyle::TripleSlash
+        };
+
+        if let Some(doc) = format_docstring(declaration.docs, comment_style, 0) {
             r = format!("{}\n{}", doc, r);
         }
 
