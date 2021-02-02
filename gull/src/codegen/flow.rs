@@ -30,6 +30,7 @@ impl Codegen for FlowCodegen {
 
         let mut docblock = docblock::SourceFile::from_source(&declarations_code);
         docblock.set_directive("flow", None);
+        docblock.set_directive("nolint", None);
 
         Ok(docblock.to_source())
     }

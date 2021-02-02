@@ -234,7 +234,7 @@ type GraphiteIngesterOperation = shape(
 type GraphiteIngesterNodeID = int;
 
 type GraphiteIngesterGraphNode = shape(
-    'node_id' => NodeID,
+    'node_id' => GraphiteIngesterNodeID,
 );
 
 // Wrapper value that represents a graph. It contains various top level
@@ -278,6 +278,7 @@ fn flow_test() -> Result<()> {
         r#"
 /*
  * @flow
+ * @nolint
  */
 
 
