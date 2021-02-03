@@ -58,22 +58,24 @@ impl RustCodegen {
 
         let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => format!(
-                "type {} = {};",
+                "pub type {} = {};",
                 declaration.name,
                 self.gen_primitive_type(p)
             )
             .into(),
             DeclarationValue::TMap(m) => {
-                format!("type {} = {};", declaration.name, self.gen_map(m))
+                format!("pub type {} = {};", declaration.name, self.gen_map(m))
             }
             DeclarationValue::TTuple(t) => {
-                format!("type {} = {};", declaration.name, self.gen_tuple(t))
+                format!("pub type {} = {};", declaration.name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
                 prefix.push_str("#[derive(Debug, serde::Serialize, serde::Deserialize)]\n");
-                format!("struct {} {}", declaration.name, self.gen_struct(s, 0))
+                format!("pub struct {} {}", declaration.name, self.gen_struct(s, 0))
             }
-            DeclarationValue::TEnum(e) => format!("enum {} {}", declaration.name, self.gen_enum(e)),
+            DeclarationValue::TEnum(e) => {
+                format!("pub enum {} {}", declaration.name, self.gen_enum(e))
+            }
             DeclarationValue::Docs => String::new(),
         };
 

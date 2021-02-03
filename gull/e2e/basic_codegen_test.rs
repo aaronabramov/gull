@@ -158,10 +158,10 @@ use std::collections::BTreeMap;
 
 #[derive(Copy)]
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
-type Frame = (String, i64);
+pub type Frame = (String, i64);
 
 /// Operation is a single unit of transormation logic
-enum Operation {
+pub enum Operation {
     /// Fetch items by their IDs
     Fetch(i64),
     /// Store graphs to a storage layer
@@ -173,10 +173,10 @@ enum Operation {
     Drop,
 }
 
-type NodeID = i64;
+pub type NodeID = i64;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct GraphNode {
+pub struct GraphNode {
     node_id: NodeID,
 }
 
@@ -198,7 +198,7 @@ struct GraphNode {
 /// Some more docs after the ASCII drawings.
 /// 
 /// Maybe some extra line after a newline.
-struct GraphData {
+pub struct GraphData {
     /// Root nodes of the graph
     entry_points: Vec<i64>,
     nodes: BTreeMap<i64, GraphNode>,

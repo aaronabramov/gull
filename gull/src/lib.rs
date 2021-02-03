@@ -42,7 +42,7 @@ assert_eq!(
 
 #[derive(Copy)]
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
-type Frame = (String, i64);
+pub type Frame = (String, i64);
 "
     );
 ```
