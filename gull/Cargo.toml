@@ -13,12 +13,12 @@ repository = "https://github.com/aaronabramov/gull"
 anyhow = "1.0"
 colored = "2"
 diff = "0.1"
-docblock = "0.0"
+docblock = "0.0.1"
 hex = "0.4.2"
 sha2 = "0.9.1"
 
 [dev-dependencies]
-k9 = "*"
+k9 = "0.10"
 regex = "1"
 serde = { version = "1.0.101", features = ["derive"] }
 serde_cbor = "0.9"
