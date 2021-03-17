@@ -178,7 +178,7 @@ impl RustCodegen {
                 EnumVariantType::Empty => "".into(),
                 EnumVariantType::Tuple(t) => self.gen_tuple(t),
                 EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
-                EnumVariantType::Primitive(p) => format!(" {}", self.gen_primitive_type(p)),
+                EnumVariantType::Primitive(p) => format!("({})", self.gen_primitive_type(p)),
             };
 
             variant_type = format!("\n    {}{},", variant.name, variant_type);
