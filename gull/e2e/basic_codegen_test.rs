@@ -58,6 +58,11 @@ fn make_declarations() -> Declarations {
                     docs: "Discard all graphs",
                     variant_type: EnumVariantType::Empty,
                 },
+                EnumVariant {
+                    name: "FakeOp",
+                    docs: "Not a real operation",
+                    variant_type: EnumVariantType::Primitive(TPrimitive::Ti64),
+                },
             ],
         }),
     });
@@ -171,6 +176,8 @@ pub enum Operation {
     },
     /// Discard all graphs
     Drop,
+    /// Not a real operation
+    FakeOp(i64),
 }
 
 pub type NodeID = i64;
@@ -238,6 +245,7 @@ enum GraphiteIngesterOperationType: string as string {
     FETCH = "Fetch";
     STORE = "Store";
     DROP = "Drop";
+    FAKEOP = "FakeOp";
 }
 
 type GraphiteIngesterOperation = shape(
@@ -251,6 +259,8 @@ type GraphiteIngesterOperation = shape(
     ),
     // Discard all graphs
     ?'Drop' => null,
+    // Not a real operation
+    ?'FakeOp' => int,
 );
 
 type GraphiteIngesterNodeID = int;
@@ -314,7 +324,7 @@ fn flow_test() -> Result<()> {
 export type Frame = [string, number];
 
 // Operation is a single unit of transormation logic
-type OperationType = "Fetch" | "Store" | "Drop";
+type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 
 type Operation = {|
     'type': OperationType,
@@ -327,6 +337,8 @@ type Operation = {|
     |},
     // Discard all graphs
     'Drop'?: null,
+    // Not a real operation
+    'FakeOp'?: number,
 |};
 
 export type NodeID = number;
