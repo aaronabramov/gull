@@ -3,7 +3,7 @@
 `Gull` is a tool that can generate static type definitions for multiple
 languages.
 
-Given an abstract definitions of types it can generate source code
+Givennu abstract definitions of types it can generate source code
 containing these type definitions in multiple languages.
 
 Although different languages might have different support for types
