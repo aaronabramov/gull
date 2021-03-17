@@ -122,4 +122,5 @@ pub enum EnumVariantType {
     Empty,
     Tuple(TTuple),
     Struct(TStruct),
+    Primitive(TPrimitive),
 }
