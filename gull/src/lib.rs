@@ -3,7 +3,7 @@
 `Gull` is a tool that can generate static type definitions for multiple
 languages.
 
-Givennu abstract definitions of types it can generate source code
+Given abstract definitions of types it can generate source code
 containing these type definitions in multiple languages.
 
 Although different languages might have different support for types
@@ -11,7 +11,7 @@ Although different languages might have different support for types
 they both serialize to the same JSON object and can be deserialized
 safely.
 
-This crate is focuse on generating developer friendly types that can
+This crate is focused on generating developer friendly types that can
 be used in the code directly. It does not intend to solve RPC problems
 like other frameworks like Thrift or gRPC are trying to solve (e.g
 gull does nothing to make sure types a backward compatible)
@@ -62,3 +62,6 @@ pub mod prelude {
     pub use crate::definitions::*;
     pub use crate::generator::*;
 }
+
+#[cfg(test)]
+mod e2e;

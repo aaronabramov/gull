@@ -1,5 +1,5 @@
+use crate::prelude::*;
 use anyhow::Result;
-use gull::prelude::*;
 
 fn make_declarations() -> Declarations {
     let mut c = Declarations::new();
