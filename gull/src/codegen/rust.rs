@@ -71,7 +71,12 @@ impl RustCodegen {
             }
             DeclarationValue::TStruct(s) => {
                 prefix.push_str("#[derive(Debug, serde::Serialize, serde::Deserialize)]\n");
-                format!("pub struct {} {}", declaration.name, self.gen_struct(s, 0))
+                format!(
+                    "pub struct {}{} {}",
+                    declaration.name,
+                    self.gen_generic_params(&s.generic_params),
+                    self.gen_struct(s, 0)
+                )
             }
             DeclarationValue::TEnum(e) => {
                 format!("pub enum {} {}", declaration.name, self.gen_enum(e))
@@ -154,6 +159,7 @@ impl RustCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
+                StructFieldType::TGeneric(TGeneric(name)) => name.to_string(),
             };
 
             let mut field_str = format!("\n    {}{}: {},", &indent, field.name, field_type);
@@ -218,6 +224,19 @@ impl RustCodegen {
             TPrimitive::Tbool => "bool",
             TPrimitive::Ti64 => "i64",
             TPrimitive::Tf64 => "f64",
+        }
+    }
+
+    fn gen_generic_params(&self, params: &[TGeneric]) -> String {
+        if params.is_empty() {
+            String::new()
+        } else {
+            let p = params
+                .iter()
+                .map(|g| g.0.to_string())
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("<{}>", p)
         }
     }
 }

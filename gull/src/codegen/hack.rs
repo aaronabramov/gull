@@ -46,7 +46,12 @@ impl HackCodegen {
                 format!("type {} = {};", name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                format!("type {} = {};", name, self.gen_struct(s, 0))
+                format!(
+                    "type {}{} = {};",
+                    name,
+                    self.gen_generic_params(&s.generic_params),
+                    self.gen_struct(s, 0)
+                )
             }
             DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
             DeclarationValue::Docs => String::new(),
@@ -109,6 +114,7 @@ impl HackCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
+                StructFieldType::TGeneric(TGeneric(name)) => name.to_string(),
             };
 
             field_type = format!("\n    {}'{}' => {},", &prefix, field.name, field_type);
@@ -204,5 +210,18 @@ type {} = shape({}\n);",
 
     fn gen_name(&self, d: &TypeDeclaration) -> String {
         format!("{}{}", self.namespace, d.name)
+    }
+
+    fn gen_generic_params(&self, params: &[TGeneric]) -> String {
+        if params.is_empty() {
+            String::new()
+        } else {
+            let p = params
+                .iter()
+                .map(|g| g.0.to_string())
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("<{}>", p)
+        }
     }
 }

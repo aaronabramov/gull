@@ -38,6 +38,9 @@ pub struct TMap {
 }
 
 #[derive(Debug, Clone)]
+pub struct TGeneric(pub &'static str);
+
+#[derive(Debug, Clone)]
 pub enum TMapValue {
     TPrimitive(TPrimitive),
     Reference(TypeDeclaration),
@@ -79,6 +82,7 @@ pub enum DeclarationValue {
 
 #[derive(Debug, Clone)]
 pub struct TStruct {
+    pub generic_params: Vec<TGeneric>,
     pub fields: Vec<StructField>,
 }
 
@@ -103,6 +107,7 @@ pub enum StructFieldType {
     TPrimitive(TPrimitive),
     TTuple(TTuple),
     TVec(TVec),
+    TGeneric(TGeneric),
 }
 
 #[derive(Debug, Clone)]

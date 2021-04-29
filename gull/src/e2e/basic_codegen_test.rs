@@ -45,6 +45,7 @@ fn make_declarations() -> Declarations {
                     name: "Store",
                     docs: "Store graphs to a storage layer",
                     variant_type: EnumVariantType::Struct(TStruct {
+                        generic_params: vec![],
                         fields: vec![StructField {
                             name: "frames",
                             docs: "Destination frames for the storage",
@@ -79,6 +80,7 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![],
         value: DeclarationValue::TStruct(TStruct {
+            generic_params: vec![],
             fields: vec![StructField {
                 name: "node_id",
                 docs: "",
@@ -110,6 +112,7 @@ fn make_declarations() -> Declarations {
         "#,
         config: vec![],
         value: DeclarationValue::TStruct(TStruct {
+            generic_params: vec![],
             fields: vec![
                 StructField {
                     name: "entry_points",

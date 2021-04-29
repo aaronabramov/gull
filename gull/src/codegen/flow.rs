@@ -50,7 +50,12 @@ impl FlowCodegen {
                 format!("export type {} = {};", name, self.gen_tuple(t))
             }
             DeclarationValue::TStruct(s) => {
-                format!("export type {} = {};", name, self.gen_struct(s, 0))
+                format!(
+                    "export type {}{} = {};",
+                    name,
+                    self.gen_generic_params(&s.generic_params),
+                    self.gen_struct(s, 0)
+                )
             }
             DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
             DeclarationValue::Docs => String::new(),
@@ -113,6 +118,7 @@ impl FlowCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
+                StructFieldType::TGeneric(TGeneric(name)) => name.to_string(),
             };
 
             field_type = format!("\n    {}'{}': {},", &indent_prefix, field.name, field_type);
@@ -200,5 +206,18 @@ type {} = {{|{}\n|}};",
 
     fn gen_name(&self, d: &TypeDeclaration) -> String {
         d.name.to_string()
+    }
+
+    fn gen_generic_params(&self, params: &[TGeneric]) -> String {
+        if params.is_empty() {
+            String::new()
+        } else {
+            let p = params
+                .iter()
+                .map(|g| g.0.to_string())
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("<{}>", p)
+        }
     }
 }
