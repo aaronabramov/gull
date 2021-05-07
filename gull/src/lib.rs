@@ -1,3 +1,5 @@
+#![allow(clippy::new_without_default)]
+
 /*!
 
 `Gull` is a tool that can generate static type definitions for multiple

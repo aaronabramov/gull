@@ -8,6 +8,7 @@ pub enum TPrimitive {
     Ti64,
     Tf64,
     Tbool,
+    TGeneric(TGeneric),
 }
 
 #[derive(Debug, Clone)]

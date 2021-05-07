@@ -205,6 +205,7 @@ type {} = shape({}\n);",
             TPrimitive::Tbool => "bool",
             TPrimitive::Ti64 => "int",
             TPrimitive::Tf64 => "float",
+            TPrimitive::TGeneric(TGeneric(s)) => s,
         }
     }
 

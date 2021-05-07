@@ -18,7 +18,7 @@ hex = "0.4.2"
 sha2 = "0.9.1"
 
 [dev-dependencies]
-k9 = "0.10"
+k9 = "0.11"
 regex = "1"
 serde = { version = "1.0.101", features = ["derive"] }
 serde_cbor = "0.9"

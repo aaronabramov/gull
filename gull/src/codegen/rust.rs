@@ -224,6 +224,7 @@ impl RustCodegen {
             TPrimitive::Tbool => "bool",
             TPrimitive::Ti64 => "i64",
             TPrimitive::Tf64 => "f64",
+            TPrimitive::TGeneric(TGeneric(s)) => s,
         }
     }
 

@@ -201,6 +201,7 @@ type {} = {{|{}\n|}};",
             TPrimitive::Tbool => "boolean",
             TPrimitive::Ti64 => "number",
             TPrimitive::Tf64 => "number",
+            TPrimitive::TGeneric(TGeneric(s)) => s,
         }
     }
 

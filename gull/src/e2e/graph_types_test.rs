@@ -30,7 +30,7 @@ fn make_declarations() -> Declarations {
         value: DeclarationValue::TPrimitive(TPrimitive::String),
     });
 
-    c.add(TypeDeclaration {
+    let node = c.add(TypeDeclaration {
         name: "GraphNode",
         docs: "",
         config: vec![],
@@ -45,6 +45,24 @@ fn make_declarations() -> Declarations {
         }),
     });
 
+    c.add(TypeDeclaration {
+        name: "Graph",
+        docs: "",
+        config: vec![],
+        value: DeclarationValue::TStruct(TStruct {
+            generic_params: vec![TGeneric("T")],
+            fields: vec![StructField {
+                name: "nodes",
+                docs: "",
+                field_type: StructFieldType::TMap(TMap {
+                    key: TPrimitive::TGeneric(TGeneric("T")),
+                    value: TMapValue::Reference(node),
+                }),
+                config: vec![],
+            }],
+        }),
+    });
+
     c
 }
 
@@ -54,6 +72,7 @@ fn rust_test() -> Result<()> {
     k9::snapshot!(
         declarations.codegen_rust()?,
         "
+use std::collections::BTreeMap;
 
 
 // ==========================================================================
@@ -68,6 +87,11 @@ pub type NodeName = String;
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GraphNode<T> {
     name: T,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct Graph<T> {
+    nodes: BTreeMap<T, GraphNode>,
 }
 
 "
@@ -95,6 +119,10 @@ type GraphiteIngesterNodeName = string;
 
 type GraphiteIngesterGraphNode<T> = shape(
     'name' => T,
+);
+
+type GraphiteIngesterGraph<T> = shape(
+    'nodes' => dict<T, GraphiteIngesterGraphNode>,
 );
 
 "
@@ -126,6 +154,10 @@ export type NodeName = string;
 
 export type GraphNode<T> = {|
     'name': T,
+|};
+
+export type Graph<T> = {|
+    'nodes': {[key: T]: GraphNode},
 |};
 
 "
