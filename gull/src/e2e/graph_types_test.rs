@@ -229,6 +229,7 @@ pub struct GraphNode<T> {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Graph<T> {
     nodes: HashMap<T, GraphNode>,
+    timestamp: DateTime<Utc>,
 }
 
 "#
@@ -274,6 +275,7 @@ type NSGraphNode<T> = shape(
 
 type NSGraph<T> = shape(
     'nodes' => dict<T, NSGraphNode>,
+    'timestamp' => string,
 );
 
 "
@@ -323,6 +325,7 @@ export type GraphNode<T> = {|
 
 export type Graph<T> = {|
     'nodes': {[key: T]: GraphNode},
+    'timestamp': string,
 |};
 
 "
