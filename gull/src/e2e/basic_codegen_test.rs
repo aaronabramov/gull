@@ -37,8 +37,14 @@ fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "Fetch",
                     docs: "Fetch items by their IDs",
-                    variant_type: EnumVariantType::Tuple(TTuple {
-                        items: vec![TupleItem::TPrimitive(TPrimitive::Ti64)],
+                    variant_type: EnumVariantType::Struct(TStruct {
+                        generic_params: vec![],
+                        fields: vec![StructField {
+                            name: "items",
+                            docs: "item IDs",
+                            config: vec![],
+                            field_type: StructFieldType::TVec(TVec::TPrimitive(TPrimitive::Ti64)),
+                        }],
                     }),
                 },
                 EnumVariant {
@@ -182,9 +188,13 @@ use std::collections::BTreeMap;
 pub type Frame = (String, i64);
 
 /// Operation is a single unit of transormation logic
+#[serde(tag = "variant")]
 pub enum Operation {
     /// Fetch items by their IDs
-    Fetch(i64),
+    Fetch {
+        /// item IDs
+        items: Vec<i64>,
+    },
     /// Store graphs to a storage layer
     Store {
         /// Destination frames for the storage
@@ -267,7 +277,10 @@ enum GraphiteIngesterOperationType: string as string {
 type GraphiteIngesterOperation = shape(
     'type' => GraphiteIngesterOperationType,
     // Fetch items by their IDs
-    ?'Fetch' => (int),
+    ?'Fetch' =>  shape(
+        // item IDs
+        'items' => vec<int>,
+    ),
     // Store graphs to a storage layer
     ?'Store' =>  shape(
         // Destination frames for the storage
@@ -345,7 +358,10 @@ type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 type Operation = {|
     'type': OperationType,
     // Fetch items by their IDs
-    'Fetch'?: [number],
+    'Fetch'?:  {|
+        // item IDs
+        'items': Array<number>,
+    |},
     // Store graphs to a storage layer
     'Store'?:  {|
         // Destination frames for the storage

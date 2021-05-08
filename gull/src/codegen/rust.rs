@@ -80,7 +80,13 @@ impl RustCodegen {
                 )
             }
             DeclarationValue::TEnum(e) => {
-                format!("pub enum {} {}", declaration.name, self.gen_enum(e))
+                let tag = r#"#[serde(tag = "variant")]"#;
+                format!(
+                    "{}\npub enum {} {}",
+                    tag,
+                    declaration.name,
+                    self.gen_enum(e)
+                )
             }
             DeclarationValue::Docs => String::new(),
             DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
@@ -198,7 +204,6 @@ impl RustCodegen {
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
                 EnumVariantType::Empty => "".into(),
-                EnumVariantType::Tuple(t) => self.gen_tuple(t),
                 EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
                 EnumVariantType::Primitive(p) => format!("({})", self.gen_primitive_type(p)),
             };

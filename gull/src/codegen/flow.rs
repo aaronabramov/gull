@@ -151,7 +151,6 @@ impl FlowCodegen {
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
                 EnumVariantType::Empty => "null".to_string(),
-                EnumVariantType::Tuple(t) => self.gen_tuple(t),
                 EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
                 EnumVariantType::Primitive(p) => self.gen_primitive_type(p),
             };

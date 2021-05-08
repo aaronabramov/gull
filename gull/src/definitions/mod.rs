@@ -24,6 +24,13 @@ impl TReference {
     pub fn get_name(&self) -> &'static str {
         self.name
     }
+
+    pub fn primitive(&self, generic_params: Vec<TGeneric>) -> TPrimitive {
+        TPrimitive::TReference {
+            r: *self,
+            generic_params,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -153,8 +160,9 @@ pub struct EnumVariant {
 
 #[derive(Debug, Clone)]
 pub enum EnumVariantType {
+    // NOTE: Tuples can't be supported because of
+    // complicated de\serialization rules.
     Empty,
-    Tuple(TTuple),
     Struct(TStruct),
     Primitive(TPrimitive),
 }
