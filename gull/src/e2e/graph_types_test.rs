@@ -7,6 +7,12 @@ fn make_declarations() -> Declarations {
     let skip_serializing_none =
         StructFieldConfig::RustAttribute(r#"#[serde(skip_serializing_if = "Option::is_none")]"#);
 
+    let struct_derives = TypeDeclarationConfig::RustAttribute("#[derive(Default, Clone)]");
+
+    let struct_derives_eq_ord = TypeDeclarationConfig::RustAttribute(
+        "#[derive(Default, Clone, Ord, PartialOrd, Eq, PartialEq)]",
+    );
+
     c.add_config(DeclarationsConfig::HackNamespace("NS"));
 
     c.add(TypeDeclaration {
@@ -51,7 +57,7 @@ fn make_declarations() -> Declarations {
     let dynamic_edge = c.add(TypeDeclaration {
         name: "DynamicEdge",
         docs: "",
-        config: vec![],
+        config: vec![struct_derives_eq_ord],
         value: DeclarationValue::TStruct(TStruct {
             generic_params: vec![ts_generic, tn_generic],
             fields: vec![
@@ -82,7 +88,7 @@ fn make_declarations() -> Declarations {
     let node_edges = c.add(TypeDeclaration {
         name: "NodeEdges",
         docs: "",
-        config: vec![],
+        config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
             generic_params: vec![ts_generic, tn_generic],
             fields: vec![
@@ -117,7 +123,7 @@ fn make_declarations() -> Declarations {
     let node = c.add(TypeDeclaration {
         name: "GraphNode",
         docs: "",
-        config: vec![],
+        config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
             generic_params: vec![t_generic],
             fields: vec![
@@ -140,7 +146,7 @@ fn make_declarations() -> Declarations {
     c.add(TypeDeclaration {
         name: "Graph",
         docs: "",
-        config: vec![],
+        config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
             generic_params: vec![t_generic],
             fields: vec![StructField {
@@ -179,12 +185,14 @@ pub type NodeID = i64;
 
 pub type NodeName = String;
 
+#[derive(Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct DynamicEdge<TS: Ord, TN: Ord> {
     branches: BTreeMap<TS, BTreeSet<TN>>,
     properties: Option<BTreeMap<TS, BTreeSet<TS>>>,
 }
 
+#[derive(Default, Clone)]
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct NodeEdges<TS: Ord, TN: Ord> {
     directed: BTreeSet<TN>,
@@ -192,6 +200,7 @@ pub struct NodeEdges<TS: Ord, TN: Ord> {
     tagged: Option<BTreeMap<TS, BTreeSet<TN>>>,
 }
 
+#[derive(Default, Clone)]
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GraphNode<T> {
     name: T,
@@ -199,6 +208,7 @@ pub struct GraphNode<T> {
     edges: Option<NodeEdges>,
 }
 
+#[derive(Default, Clone)]
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Graph<T> {
     nodes: HashMap<T, GraphNode>,

@@ -76,7 +76,7 @@ pub struct TypeDeclaration {
     pub config: Vec<TypeDeclarationConfig>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum TypeDeclarationConfig {
     RustAttribute(&'static str),
 }
