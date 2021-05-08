@@ -1,4 +1,4 @@
-use super::TypeDeclaration;
+use super::{TReference, TypeDeclaration};
 use crate::codegen::{Codegen, FlowCodegen, HackCodegen, RustCodegen};
 use anyhow::Result;
 
@@ -20,9 +20,12 @@ impl Declarations {
         self.config.push(config)
     }
 
-    pub fn add(&mut self, type_declaration: TypeDeclaration) -> TypeDeclaration {
-        self.declarations.push(type_declaration.clone());
-        type_declaration
+    pub fn add(&mut self, type_declaration: TypeDeclaration) -> TReference {
+        let reference = TReference {
+            name: type_declaration.name,
+        };
+        self.declarations.push(type_declaration);
+        reference
     }
 
     pub fn codegen_rust(&self) -> Result<String> {

@@ -1,4 +1,5 @@
 use super::docs::{format_docstring, CommentStyle};
+use super::shared;
 use super::Codegen;
 use crate::prelude::*;
 use anyhow::Result;
@@ -34,10 +35,10 @@ impl Codegen for HackCodegen {
 
 impl HackCodegen {
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
-        let name = self.gen_name(&declaration);
+        let name = self.gen_namespaced_name(declaration.name);
         let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => {
-                format!("type {} = {};", name, self.gen_primitive_type(p)).into()
+                format!("type {} = {};", name, self.gen_primitive_type(p))
             }
             DeclarationValue::TMap(m) => {
                 format!("type {} = {};", name, self.gen_map(m))
@@ -67,8 +68,7 @@ impl HackCodegen {
 
     fn gen_map(&self, m: &TMap) -> String {
         let value = match &m.value {
-            TMapValue::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
-            TMapValue::Reference(d) => self.gen_name(d),
+            TMapValue::TPrimitive(p) => self.gen_primitive_type(p),
             TMapValue::TSet(s) => self.gen_set(s),
         };
 
@@ -77,16 +77,14 @@ impl HackCodegen {
 
     fn gen_vec(&self, v: &TVec) -> String {
         let value = match &v {
-            TVec::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
-            TVec::Reference(d) => self.gen_name(d),
+            TVec::TPrimitive(p) => self.gen_primitive_type(p),
         };
         format!("vec<{}>", value)
     }
 
     fn gen_set(&self, s: &TSet) -> String {
         let value = match &s {
-            TSet::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
-            TSet::Reference(d) => self.gen_name(d),
+            TSet::TPrimitive(p) => self.gen_primitive_type(p),
         };
 
         format!("keyset<{}>", value)
@@ -94,8 +92,7 @@ impl HackCodegen {
 
     fn gen_option(&self, o: &TOption) -> String {
         let value = match &o {
-            TOption::Reference(r) => self.gen_name(r),
-            TOption::TPrimitive(p) => self.gen_primitive_type(&p).into(),
+            TOption::TPrimitive(p) => self.gen_primitive_type(&p),
             TOption::TMap(m) => self.gen_map(m),
             TOption::TVec(v) => self.gen_vec(v),
             TOption::TSet(s) => self.gen_set(s),
@@ -110,11 +107,10 @@ impl HackCodegen {
 
         for field in &s.fields {
             let mut field_type = match &field.field_type {
-                StructFieldType::Reference(r) => self.gen_name(r),
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TSet(s) => self.gen_set(s),
                 StructFieldType::TOption(o) => self.gen_option(o),
-                StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
+                StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
                 StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
@@ -161,7 +157,7 @@ impl HackCodegen {
                 EnumVariantType::Empty => "null".to_string(),
                 EnumVariantType::Tuple(t) => self.gen_tuple(t),
                 EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
-                EnumVariantType::Primitive(p) => format!("{}", self.gen_primitive_type(p)),
+                EnumVariantType::Primitive(p) => self.gen_primitive_type(p),
             };
 
             variant_type = format!("\n    ?'{}' => {},", variant.name, variant_type);
@@ -189,7 +185,6 @@ type {} = shape({}\n);",
             let is_last = n == t.items.len() - 1;
 
             let value = match item {
-                TupleItem::Reference(d) => self.gen_name(d),
                 TupleItem::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
             };
 
@@ -202,18 +197,26 @@ type {} = shape({}\n);",
         format!("({})", values)
     }
 
-    fn gen_primitive_type(&self, ty: &TPrimitive) -> &'static str {
+    fn gen_primitive_type(&self, ty: &TPrimitive) -> String {
         match ty {
-            TPrimitive::String => "string",
-            TPrimitive::Tbool => "bool",
-            TPrimitive::Ti64 => "int",
-            TPrimitive::Tf64 => "float",
-            TPrimitive::TGeneric(TGeneric { name, .. }) => name,
+            TPrimitive::String => "string".to_string(),
+            TPrimitive::Tbool => "bool".to_string(),
+            TPrimitive::Ti64 => "int".to_string(),
+            TPrimitive::Tf64 => "float".to_string(),
+            TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
+            TPrimitive::TReference { r, generic_params } => {
+                format!(
+                    "{}{}",
+                    self.gen_namespaced_name(r.get_name()),
+                    shared::generic_params(&generic_params)
+                )
+            }
         }
     }
 
-    fn gen_name(&self, d: &TypeDeclaration) -> String {
-        format!("{}{}", self.namespace, d.name)
+    // Get **namespaced** declaration/reference name
+    fn gen_namespaced_name(&self, name: &str) -> String {
+        format!("{}{}", self.namespace, name)
     }
 
     fn gen_generic_params(&self, params: &[TGeneric]) -> String {

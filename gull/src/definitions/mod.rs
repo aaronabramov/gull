@@ -8,11 +8,26 @@ pub enum TPrimitive {
     Tf64,
     Tbool,
     TGeneric(TGeneric),
+    TReference {
+        r: TReference,
+        generic_params: Vec<TGeneric>,
+    },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TReference {
+    // private field. must be returned by declarations
+    name: &'static str,
+}
+
+impl TReference {
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
 }
 
 #[derive(Debug, Clone)]
 pub enum TOption {
-    Reference(TypeDeclaration),
     TMap(TMap),
     TPrimitive(TPrimitive),
     TSet(TSet),
@@ -22,13 +37,11 @@ pub enum TOption {
 #[derive(Debug, Clone)]
 pub enum TVec {
     TPrimitive(TPrimitive),
-    Reference(TypeDeclaration),
 }
 
 #[derive(Debug, Clone)]
 pub enum TSet {
     TPrimitive(TPrimitive),
-    Reference(TypeDeclaration),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -53,7 +66,6 @@ pub struct TGeneric {
 #[derive(Debug, Clone)]
 pub enum TMapValue {
     TPrimitive(TPrimitive),
-    Reference(TypeDeclaration),
     TSet(TSet),
 }
 
@@ -64,7 +76,6 @@ pub struct TTuple {
 
 #[derive(Debug, Clone)]
 pub enum TupleItem {
-    Reference(TypeDeclaration),
     TPrimitive(TPrimitive),
 }
 
@@ -119,7 +130,6 @@ pub enum StructFieldConfig {
 
 #[derive(Debug, Clone)]
 pub enum StructFieldType {
-    Reference(TypeDeclaration),
     TMap(TMap),
     TSet(TSet),
     TOption(TOption),

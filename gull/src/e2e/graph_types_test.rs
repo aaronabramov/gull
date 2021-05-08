@@ -110,7 +110,10 @@ fn make_declarations() -> Declarations {
                 StructField {
                     name: "dynamic",
                     docs: "",
-                    field_type: StructFieldType::Reference(dynamic_edge),
+                    field_type: StructFieldType::TPrimitive(TPrimitive::TReference {
+                        r: dynamic_edge,
+                        generic_params: vec![],
+                    }),
                     config: vec![],
                 },
                 StructField {
@@ -143,7 +146,12 @@ fn make_declarations() -> Declarations {
                 StructField {
                     name: "edges",
                     docs: "",
-                    field_type: StructFieldType::TOption(TOption::Reference(node_edges)),
+                    field_type: StructFieldType::TOption(TOption::TPrimitive(
+                        TPrimitive::TReference {
+                            r: node_edges,
+                            generic_params: vec![],
+                        },
+                    )),
                     config: vec![skip_serializing_none],
                 },
             ],
@@ -162,7 +170,10 @@ fn make_declarations() -> Declarations {
                     docs: "",
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::TGeneric(t_generic),
-                        value: TMapValue::Reference(node),
+                        value: TMapValue::TPrimitive(TPrimitive::TReference {
+                            r: node,
+                            generic_params: vec![],
+                        }),
                         t: TMapType::Hash,
                     }),
                     config: vec![],

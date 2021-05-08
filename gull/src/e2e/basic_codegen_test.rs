@@ -50,7 +50,12 @@ fn make_declarations() -> Declarations {
                             name: "frames",
                             docs: "Destination frames for the storage",
                             config: vec![],
-                            field_type: StructFieldType::TVec(TVec::Reference(frame)),
+                            field_type: StructFieldType::TVec(TVec::TPrimitive(
+                                TPrimitive::TReference {
+                                    r: frame,
+                                    generic_params: vec![],
+                                },
+                            )),
                         }],
                     }),
                 },
@@ -85,7 +90,10 @@ fn make_declarations() -> Declarations {
                 name: "node_id",
                 docs: "",
                 config: vec![],
-                field_type: StructFieldType::Reference(node_id),
+                field_type: StructFieldType::TPrimitive(TPrimitive::TReference {
+                    r: node_id,
+                    generic_params: vec![],
+                }),
             }],
         }),
     });
@@ -126,7 +134,10 @@ fn make_declarations() -> Declarations {
                     config: vec![],
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::Ti64,
-                        value: TMapValue::Reference(graph_node),
+                        value: TMapValue::TPrimitive(TPrimitive::TReference {
+                            r: graph_node,
+                            generic_params: vec![],
+                        }),
                         t: TMapType::BTree,
                     }),
                 },

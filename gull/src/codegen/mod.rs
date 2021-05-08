@@ -2,6 +2,7 @@ mod docs;
 mod flow;
 mod hack;
 mod rust;
+mod shared;
 
 use crate::definitions::Declarations;
 use anyhow::Result;

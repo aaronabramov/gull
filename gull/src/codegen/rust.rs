@@ -1,4 +1,5 @@
 use super::docs::{format_docstring, CommentStyle};
+use super::shared;
 use super::Codegen;
 use crate::definitions::*;
 use anyhow::Result;
@@ -62,8 +63,7 @@ impl RustCodegen {
                 "pub type {} = {};",
                 declaration.name,
                 self.gen_primitive_type(p)
-            )
-            .into(),
+            ),
             DeclarationValue::TMap(m) => {
                 format!("pub type {} = {};", declaration.name, self.gen_map(m))
             }
@@ -101,8 +101,7 @@ impl RustCodegen {
 
     fn gen_map(&self, m: &TMap) -> String {
         let value = match &m.value {
-            TMapValue::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
-            TMapValue::Reference(d) => d.name.to_string(),
+            TMapValue::TPrimitive(p) => self.gen_primitive_type(p),
             TMapValue::TSet(s) => self.gen_set(s),
         };
 
@@ -128,7 +127,6 @@ impl RustCodegen {
     fn gen_vec(&self, v: &TVec) -> String {
         let value = match &v {
             TVec::TPrimitive(p) => self.gen_primitive_type(p),
-            TVec::Reference(d) => d.name,
         };
         format!("Vec<{}>", value)
     }
@@ -136,7 +134,6 @@ impl RustCodegen {
     fn gen_set(&self, s: &TSet) -> String {
         let value = match &s {
             TSet::TPrimitive(p) => self.gen_primitive_type(p),
-            TSet::Reference(d) => d.name,
         };
 
         self.add_import("use std::collections::BTreeSet;");
@@ -145,8 +142,7 @@ impl RustCodegen {
 
     fn gen_option(&self, o: &TOption) -> String {
         let value = match &o {
-            TOption::Reference(r) => r.name.into(),
-            TOption::TPrimitive(p) => self.gen_primitive_type(&p).into(),
+            TOption::TPrimitive(p) => self.gen_primitive_type(&p),
             TOption::TMap(m) => self.gen_map(m),
             TOption::TVec(v) => self.gen_vec(v),
             TOption::TSet(s) => self.gen_set(s),
@@ -173,11 +169,10 @@ impl RustCodegen {
             }
 
             let field_type = value_override.unwrap_or_else(|| match &field.field_type {
-                StructFieldType::Reference(r) => r.name.into(),
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TSet(s) => self.gen_set(s),
                 StructFieldType::TOption(o) => self.gen_option(o),
-                StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
+                StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
                 StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
@@ -226,11 +221,10 @@ impl RustCodegen {
             let is_last = n == t.items.len() - 1;
 
             let value = match item {
-                TupleItem::Reference(d) => d.name,
                 TupleItem::TPrimitive(p) => self.gen_primitive_type(p),
             };
 
-            values.push_str(value);
+            values.push_str(&value);
             if !is_last {
                 values.push_str(", ");
             }
@@ -239,13 +233,20 @@ impl RustCodegen {
         format!("({})", values)
     }
 
-    fn gen_primitive_type(&self, ty: &TPrimitive) -> &'static str {
+    fn gen_primitive_type(&self, ty: &TPrimitive) -> String {
         match ty {
-            TPrimitive::String => "String",
-            TPrimitive::Tbool => "bool",
-            TPrimitive::Ti64 => "i64",
-            TPrimitive::Tf64 => "f64",
-            TPrimitive::TGeneric(TGeneric { name, .. }) => name,
+            TPrimitive::String => "String".to_string(),
+            TPrimitive::Tbool => "bool".to_string(),
+            TPrimitive::Ti64 => "i64".to_string(),
+            TPrimitive::Tf64 => "f64".to_string(),
+            TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
+            TPrimitive::TReference { r, generic_params } => {
+                format!(
+                    "{}{}",
+                    r.get_name(),
+                    shared::generic_params(&generic_params)
+                )
+            }
         }
     }
 
