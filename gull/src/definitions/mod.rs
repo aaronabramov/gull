@@ -114,6 +114,7 @@ pub enum StructFieldConfig {
 pub enum StructFieldType {
     Reference(TypeDeclaration),
     TMap(TMap),
+    TSet(TSet),
     TOption(TOption),
     TPrimitive(TPrimitive),
     TTuple(TTuple),

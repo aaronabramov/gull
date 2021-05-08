@@ -87,17 +87,25 @@ fn make_declarations() -> Declarations {
             generic_params: vec![ts_generic, tn_generic],
             fields: vec![
                 StructField {
+                    name: "directed",
+                    docs: "",
+                    field_type: StructFieldType::TSet(TSet::TPrimitive(TPrimitive::TGeneric(
+                        tn_generic,
+                    ))),
+                    config: vec![],
+                },
+                StructField {
                     name: "dynamic",
                     docs: "",
                     field_type: StructFieldType::Reference(dynamic_edge),
                     config: vec![],
                 },
                 StructField {
-                    name: "properties",
+                    name: "tagged",
                     docs: "",
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
                         key: TPrimitive::TGeneric(ts_generic),
-                        value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(ts_generic))),
+                        value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(tn_generic))),
                         t: TMapType::BTree,
                     })),
                     config: vec![],
@@ -179,8 +187,9 @@ pub struct DynamicEdge<TS: Ord, TN: Ord> {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct NodeEdges<TS: Ord, TN: Ord> {
+    directed: BTreeSet<TN>,
     dynamic: DynamicEdge,
-    properties: Option<BTreeMap<TS, BTreeSet<TS>>>,
+    tagged: Option<BTreeMap<TS, BTreeSet<TN>>>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -224,8 +233,9 @@ type NSDynamicEdge<TS, TN> = shape(
 );
 
 type NSNodeEdges<TS, TN> = shape(
+    'directed' => keyset<TN>,
     'dynamic' => NSDynamicEdge,
-    'properties' => ?dict<TS, keyset<TS>>,
+    'tagged' => ?dict<TS, keyset<TN>>,
 );
 
 type NSGraphNode<T> = shape(
@@ -270,8 +280,9 @@ export type DynamicEdge<TS, TN> = {|
 |};
 
 export type NodeEdges<TS, TN> = {|
+    'directed': Array<TN>,
     'dynamic': DynamicEdge,
-    'properties': ?{[key: TS]: Array<TS>},
+    'tagged': ?{[key: TS]: Array<TN>},
 |};
 
 export type GraphNode<T> = {|

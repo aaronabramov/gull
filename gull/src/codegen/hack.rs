@@ -111,6 +111,7 @@ impl HackCodegen {
             let mut field_type = match &field.field_type {
                 StructFieldType::Reference(r) => self.gen_name(r),
                 StructFieldType::TMap(m) => self.gen_map(m),
+                StructFieldType::TSet(s) => self.gen_set(s),
                 StructFieldType::TOption(o) => self.gen_option(o),
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
