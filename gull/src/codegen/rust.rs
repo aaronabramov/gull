@@ -80,13 +80,9 @@ impl RustCodegen {
                 )
             }
             DeclarationValue::TEnum(e) => {
-                let tag = r#"#[serde(tag = "variant")]"#;
-                format!(
-                    "{}\npub enum {} {}",
-                    tag,
-                    declaration.name,
-                    self.gen_enum(e)
-                )
+                prefix.push_str("#[derive(Debug, serde::Serialize, serde::Deserialize)]\n");
+                prefix.push_str("#[serde(tag = \"variant\")]\n");
+                format!("pub enum {} {}", declaration.name, self.gen_enum(e))
             }
             DeclarationValue::Docs => String::new(),
             DeclarationValue::CodeBlock(b) => self.gen_code_block(b),

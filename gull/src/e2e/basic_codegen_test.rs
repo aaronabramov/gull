@@ -187,8 +187,9 @@ use std::collections::BTreeMap;
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 pub type Frame = (String, i64);
 
-/// Operation is a single unit of transormation logic
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "variant")]
+/// Operation is a single unit of transormation logic
 pub enum Operation {
     /// Fetch items by their IDs
     Fetch {
