@@ -159,6 +159,7 @@ fn rust_test() -> Result<()> {
         r#"
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
 
 
 // ==========================================================================

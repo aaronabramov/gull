@@ -105,11 +105,16 @@ impl RustCodegen {
         };
 
         let map_type = match m.t {
-            TMapType::Hash => "HashMap",
-            TMapType::BTree => "BTreeMap",
+            TMapType::Hash => {
+                self.add_import("use std::collections::HashMap;");
+                "HashMap"
+            }
+            TMapType::BTree => {
+                self.add_import("use std::collections::BTreeMap;");
+                "BTreeMap"
+            }
         };
 
-        self.add_import("use std::collections::BTreeMap;");
         format!(
             "{}<{}, {}>",
             map_type,
