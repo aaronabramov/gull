@@ -1,5 +1,4 @@
 pub mod declarations;
-
 pub use declarations::Declarations;
 
 #[derive(Debug, Clone)]
@@ -32,10 +31,17 @@ pub enum TSet {
     Reference(TypeDeclaration),
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum TMapType {
+    Hash,
+    BTree,
+}
+
 #[derive(Debug, Clone)]
 pub struct TMap {
     pub key: TPrimitive,
     pub value: TMapValue,
+    pub t: TMapType,
 }
 
 #[derive(Debug, Clone, Copy)]

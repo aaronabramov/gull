@@ -61,6 +61,7 @@ fn make_declarations() -> Declarations {
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::TGeneric(ts_generic),
                         value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(tn_generic))),
+                        t: TMapType::BTree,
                     }),
                     config: vec![],
                 },
@@ -70,6 +71,7 @@ fn make_declarations() -> Declarations {
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
                         key: TPrimitive::TGeneric(ts_generic),
                         value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(ts_generic))),
+                        t: TMapType::BTree,
                     })),
                     config: vec![],
                 },
@@ -96,6 +98,7 @@ fn make_declarations() -> Declarations {
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
                         key: TPrimitive::TGeneric(ts_generic),
                         value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(ts_generic))),
+                        t: TMapType::BTree,
                     })),
                     config: vec![],
                 },
@@ -138,6 +141,7 @@ fn make_declarations() -> Declarations {
                 field_type: StructFieldType::TMap(TMap {
                     key: TPrimitive::TGeneric(t_generic),
                     value: TMapValue::Reference(node),
+                    t: TMapType::Hash,
                 }),
                 config: vec![],
             }],
@@ -187,7 +191,7 @@ pub struct GraphNode<T> {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Graph<T> {
-    nodes: BTreeMap<T, GraphNode>,
+    nodes: HashMap<T, GraphNode>,
 }
 
 "#

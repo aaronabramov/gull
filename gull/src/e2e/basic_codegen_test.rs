@@ -127,6 +127,7 @@ fn make_declarations() -> Declarations {
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::Ti64,
                         value: TMapValue::Reference(graph_node),
+                        t: TMapType::BTree,
                     }),
                 },
                 StructField {
@@ -140,6 +141,7 @@ fn make_declarations() -> Declarations {
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
                         key: TPrimitive::String,
                         value: TMapValue::TPrimitive(TPrimitive::String),
+                        t: TMapType::BTree,
                     })),
                 },
             ],

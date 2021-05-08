@@ -104,8 +104,18 @@ impl RustCodegen {
             TMapValue::TSet(s) => self.gen_set(s),
         };
 
+        let map_type = match m.t {
+            TMapType::Hash => "HashMap",
+            TMapType::BTree => "BTreeMap",
+        };
+
         self.add_import("use std::collections::BTreeMap;");
-        format!("BTreeMap<{}, {}>", self.gen_primitive_type(&m.key), value)
+        format!(
+            "{}<{}, {}>",
+            map_type,
+            self.gen_primitive_type(&m.key),
+            value
+        )
     }
 
     fn gen_vec(&self, v: &TVec) -> String {
