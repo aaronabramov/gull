@@ -82,6 +82,7 @@ impl RustCodegen {
                 format!("pub enum {} {}", declaration.name, self.gen_enum(e))
             }
             DeclarationValue::Docs => String::new(),
+            DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
         };
 
         let comment_style = if let DeclarationValue::Docs = declaration.value {
@@ -261,6 +262,16 @@ impl RustCodegen {
                 .collect::<Vec<_>>()
                 .join(", ");
             format!("<{}>", p)
+        }
+    }
+
+    fn gen_code_block(&self, b: &CodeBlock) -> String {
+        match b {
+            CodeBlock::Rust(lines) => lines
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
+                .join("\n"),
         }
     }
 }

@@ -59,6 +59,7 @@ impl FlowCodegen {
             }
             DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
             DeclarationValue::Docs => String::new(),
+            DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
         };
 
         if let Some(doc) = format_docstring(declaration.docs, CommentStyle::DoubleSlash, 0) {
@@ -221,6 +222,12 @@ type {} = {{|{}\n|}};",
                 .collect::<Vec<_>>()
                 .join(", ");
             format!("<{}>", p)
+        }
+    }
+
+    fn gen_code_block(&self, b: &CodeBlock) -> String {
+        match b {
+            CodeBlock::Rust(_) => String::new(),
         }
     }
 }

@@ -17,6 +17,13 @@ fn make_declarations() -> Declarations {
 
     c.add(TypeDeclaration {
         name: "",
+        docs: "",
+        config: vec![],
+        value: DeclarationValue::CodeBlock(CodeBlock::Rust(vec!["use chrono::{DateTime, Utc};"])),
+    });
+
+    c.add(TypeDeclaration {
+        name: "",
         docs: "
         ==========================================================================
         Simple file defining various graph data types
@@ -176,6 +183,8 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 
 
+use chrono::{DateTime, Utc};
+
 // ==========================================================================
 // Simple file defining various graph data types
 // ==========================================================================
@@ -228,6 +237,8 @@ fn hack_test() -> Result<()> {
         r"
 <?hh // strict
 
+
+
 // ==========================================================================
 // Simple file defining various graph data types
 // ==========================================================================
@@ -273,6 +284,8 @@ fn flow_test() -> Result<()> {
  * @flow
  * @nolint
  */
+
+
 
 
 // ==========================================================================

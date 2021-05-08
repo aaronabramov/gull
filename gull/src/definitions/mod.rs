@@ -89,6 +89,12 @@ pub enum DeclarationValue {
     TStruct(TStruct),
     TTuple(TTuple),
     Docs,
+    CodeBlock(CodeBlock),
+}
+
+#[derive(Debug, Clone)]
+pub enum CodeBlock {
+    Rust(Vec<&'static str>),
 }
 
 #[derive(Debug, Clone)]
