@@ -214,14 +214,12 @@ pub type NodeID = i64;
 pub type NodeName = String;
 
 #[derive(Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct DynamicEdge<TS: Ord, TN: Ord> {
     branches: BTreeMap<TS, BTreeSet<TN>>,
     properties: Option<BTreeMap<TS, BTreeSet<TS>>>,
 }
 
 #[derive(Default, Clone)]
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct NodeEdges<TS: Ord, TN: Ord> {
     directed: BTreeSet<TN>,
     dynamic: DynamicEdge,
@@ -229,7 +227,6 @@ pub struct NodeEdges<TS: Ord, TN: Ord> {
 }
 
 #[derive(Default, Clone)]
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GraphNode<T> {
     name: T,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -237,7 +234,6 @@ pub struct GraphNode<T> {
 }
 
 #[derive(Default, Clone)]
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Graph<T> {
     nodes: HashMap<T, GraphNode>,
     timestamp: DateTime<Utc>,

@@ -187,7 +187,6 @@ use std::collections::BTreeMap;
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 pub type Frame = (String, i64);
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[serde(tag = "variant")]
 /// Operation is a single unit of transormation logic
 pub enum Operation {
@@ -209,12 +208,10 @@ pub enum Operation {
 
 pub type NodeID = i64;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GraphNode {
     node_id: NodeID,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
 /// Wrapper value that represents a graph. It contains various top level
 /// data about the graph as well as a collection of nodes. This is a long
 /// multiline documentaino block that is here for testing purposes only. I'll also
