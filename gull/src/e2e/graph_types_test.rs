@@ -215,28 +215,28 @@ pub type NodeName = String;
 
 #[derive(Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct DynamicEdge<TS: Ord, TN: Ord> {
-    branches: BTreeMap<TS, BTreeSet<TN>>,
-    properties: Option<BTreeMap<TS, BTreeSet<TS>>>,
+    pub branches: BTreeMap<TS, BTreeSet<TN>>,
+    pub properties: Option<BTreeMap<TS, BTreeSet<TS>>>,
 }
 
 #[derive(Default, Clone)]
 pub struct NodeEdges<TS: Ord, TN: Ord> {
-    directed: BTreeSet<TN>,
-    dynamic: DynamicEdge,
-    tagged: Option<BTreeMap<TS, BTreeSet<TN>>>,
+    pub directed: BTreeSet<TN>,
+    pub dynamic: DynamicEdge,
+    pub tagged: Option<BTreeMap<TS, BTreeSet<TN>>>,
 }
 
 #[derive(Default, Clone)]
 pub struct GraphNode<T> {
-    name: T,
+    pub name: T,
     #[serde(skip_serializing_if = "Option::is_none")]
-    edges: Option<NodeEdges>,
+    pub edges: Option<NodeEdges>,
 }
 
 #[derive(Default, Clone)]
 pub struct Graph<T> {
-    nodes: HashMap<T, GraphNode>,
-    timestamp: DateTime<Utc>,
+    pub nodes: HashMap<T, GraphNode>,
+    pub timestamp: DateTime<Utc>,
 }
 
 "#

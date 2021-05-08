@@ -75,7 +75,7 @@ impl RustCodegen {
                     "pub struct {}{} {}",
                     declaration.name,
                     self.gen_generic_params(&s.generic_params),
-                    self.gen_struct(s, 0)
+                    self.gen_struct(s, 0, true)
                 )
             }
             DeclarationValue::TEnum(e) => {
@@ -151,7 +151,7 @@ impl RustCodegen {
         format!("Option<{}>", value)
     }
 
-    fn gen_struct(&self, s: &TStruct, indent_level: usize) -> String {
+    fn gen_struct(&self, s: &TStruct, indent_level: usize, pub_fields: bool) -> String {
         let mut fields = String::new();
 
         let indent = " ".repeat(indent_level);
@@ -179,7 +179,11 @@ impl RustCodegen {
                 StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
             });
 
-            let mut field_str = format!("\n    {}{}: {},", &indent, field.name, field_type);
+            let visibility = if pub_fields { "pub " } else { "" };
+            let mut field_str = format!(
+                "\n    {}{}{}: {},",
+                visibility, &indent, field.name, field_type
+            );
 
             if let Some(doc) =
                 format_docstring(field.docs, CommentStyle::TripleSlash, indent_level + 4)
@@ -199,7 +203,7 @@ impl RustCodegen {
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
                 EnumVariantType::Empty => "".into(),
-                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
+                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4, false)),
                 EnumVariantType::Primitive(p) => format!("({})", self.gen_primitive_type(p)),
             };
 

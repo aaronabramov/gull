@@ -209,7 +209,7 @@ pub enum Operation {
 pub type NodeID = i64;
 
 pub struct GraphNode {
-    node_id: NodeID,
+    pub node_id: NodeID,
 }
 
 /// Wrapper value that represents a graph. It contains various top level
@@ -231,13 +231,13 @@ pub struct GraphNode {
 /// Maybe some extra line after a newline.
 pub struct GraphData {
     /// Root nodes of the graph
-    entry_points: Vec<i64>,
-    nodes: BTreeMap<i64, GraphNode>,
+    pub entry_points: Vec<i64>,
+    pub nodes: BTreeMap<i64, GraphNode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     /// A bunch of random string fields
     /// that are represented as a map between string and string
     /// and other important lines of documentation.
-    string_fields: Option<BTreeMap<String, String>>,
+    pub string_fields: Option<BTreeMap<String, String>>,
 }
 
 "#
