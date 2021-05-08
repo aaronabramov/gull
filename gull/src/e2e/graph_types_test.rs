@@ -156,16 +156,24 @@ fn make_declarations() -> Declarations {
         config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
             generic_params: vec![t_generic],
-            fields: vec![StructField {
-                name: "nodes",
-                docs: "",
-                field_type: StructFieldType::TMap(TMap {
-                    key: TPrimitive::TGeneric(t_generic),
-                    value: TMapValue::Reference(node),
-                    t: TMapType::Hash,
-                }),
-                config: vec![],
-            }],
+            fields: vec![
+                StructField {
+                    name: "nodes",
+                    docs: "",
+                    field_type: StructFieldType::TMap(TMap {
+                        key: TPrimitive::TGeneric(t_generic),
+                        value: TMapValue::Reference(node),
+                        t: TMapType::Hash,
+                    }),
+                    config: vec![],
+                },
+                StructField {
+                    name: "timestamp",
+                    docs: "",
+                    field_type: StructFieldType::TPrimitive(TPrimitive::String),
+                    config: vec![StructFieldConfig::RustOverride("DateTime<Utc>")],
+                },
+            ],
         }),
     });
 

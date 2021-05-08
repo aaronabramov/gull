@@ -47,6 +47,7 @@ impl RustCodegen {
 
     fn gen_declaration(&self, declaration: &TypeDeclaration) -> Result<String> {
         let mut prefix = String::new();
+
         for config in &declaration.config {
             match config {
                 TypeDeclarationConfig::RustAttribute(attr) => {
@@ -160,16 +161,18 @@ impl RustCodegen {
 
         for field in s.fields.iter() {
             let mut field_prefix = String::new();
+            let mut value_override = None;
 
             for config in &field.config {
                 match config {
                     StructFieldConfig::RustAttribute(attr) => {
                         field_prefix.push_str(&format!("\n    {}{}", indent, attr))
                     }
+                    StructFieldConfig::RustOverride(o) => value_override = Some(o.to_string()),
                 }
             }
 
-            let field_type = match &field.field_type {
+            let field_type = value_override.unwrap_or_else(|| match &field.field_type {
                 StructFieldType::Reference(r) => r.name.into(),
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TSet(s) => self.gen_set(s),
@@ -178,7 +181,7 @@ impl RustCodegen {
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
                 StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
-            };
+            });
 
             let mut field_str = format!("\n    {}{}: {},", &indent, field.name, field_type);
 

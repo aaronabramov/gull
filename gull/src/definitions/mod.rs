@@ -114,6 +114,7 @@ pub struct StructField {
 #[derive(Debug, Clone)]
 pub enum StructFieldConfig {
     RustAttribute(&'static str),
+    RustOverride(&'static str),
 }
 
 #[derive(Debug, Clone)]
