@@ -99,8 +99,9 @@ impl RustCodegen {
 
     fn gen_map(&self, m: &TMap) -> String {
         let value = match &m.value {
-            TMapValue::TPrimitive(p) => self.gen_primitive_type(p),
-            TMapValue::Reference(d) => d.name,
+            TMapValue::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
+            TMapValue::Reference(d) => d.name.to_string(),
+            TMapValue::TSet(s) => self.gen_set(s),
         };
 
         self.add_import("use std::collections::BTreeMap;");
@@ -159,7 +160,7 @@ impl RustCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
-                StructFieldType::TGeneric(TGeneric(name)) => name.to_string(),
+                StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
             };
 
             let mut field_str = format!("\n    {}{}: {},", &indent, field.name, field_type);
@@ -224,7 +225,7 @@ impl RustCodegen {
             TPrimitive::Tbool => "bool",
             TPrimitive::Ti64 => "i64",
             TPrimitive::Tf64 => "f64",
-            TPrimitive::TGeneric(TGeneric(s)) => s,
+            TPrimitive::TGeneric(TGeneric { name, .. }) => name,
         }
     }
 
@@ -234,7 +235,13 @@ impl RustCodegen {
         } else {
             let p = params
                 .iter()
-                .map(|g| g.0.to_string())
+                .map(|TGeneric { name, bounds }| {
+                    format!(
+                        "{}{}",
+                        name,
+                        bounds.map_or(String::new(), |b| format!(": {}", b))
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(", ");
             format!("<{}>", p)

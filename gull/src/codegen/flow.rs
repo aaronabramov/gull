@@ -72,6 +72,7 @@ impl FlowCodegen {
         let value = match &m.value {
             TMapValue::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
             TMapValue::Reference(d) => self.gen_name(d),
+            TMapValue::TSet(s) => self.gen_set(s),
         };
 
         format!("{{[key: {}]: {}}}", self.gen_primitive_type(&m.key), value)
@@ -118,7 +119,7 @@ impl FlowCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
-                StructFieldType::TGeneric(TGeneric(name)) => name.to_string(),
+                StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
             };
 
             field_type = format!("\n    {}'{}': {},", &indent_prefix, field.name, field_type);
@@ -201,7 +202,7 @@ type {} = {{|{}\n|}};",
             TPrimitive::Tbool => "boolean",
             TPrimitive::Ti64 => "number",
             TPrimitive::Tf64 => "number",
-            TPrimitive::TGeneric(TGeneric(s)) => s,
+            TPrimitive::TGeneric(TGeneric { name, .. }) => name,
         }
     }
 
@@ -215,7 +216,7 @@ type {} = {{|{}\n|}};",
         } else {
             let p = params
                 .iter()
-                .map(|g| g.0.to_string())
+                .map(|g| g.name.to_string())
                 .collect::<Vec<_>>()
                 .join(", ");
             format!("<{}>", p)

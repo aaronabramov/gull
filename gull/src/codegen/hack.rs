@@ -68,6 +68,7 @@ impl HackCodegen {
         let value = match &m.value {
             TMapValue::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
             TMapValue::Reference(d) => self.gen_name(d),
+            TMapValue::TSet(s) => self.gen_set(s),
         };
 
         format!("dict<{}, {}>", self.gen_primitive_type(&m.key), value)
@@ -114,7 +115,7 @@ impl HackCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p).into(),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
-                StructFieldType::TGeneric(TGeneric(name)) => name.to_string(),
+                StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
             };
 
             field_type = format!("\n    {}'{}' => {},", &prefix, field.name, field_type);
@@ -205,7 +206,7 @@ type {} = shape({}\n);",
             TPrimitive::Tbool => "bool",
             TPrimitive::Ti64 => "int",
             TPrimitive::Tf64 => "float",
-            TPrimitive::TGeneric(TGeneric(s)) => s,
+            TPrimitive::TGeneric(TGeneric { name, .. }) => name,
         }
     }
 
@@ -219,7 +220,7 @@ type {} = shape({}\n);",
         } else {
             let p = params
                 .iter()
-                .map(|g| g.0.to_string())
+                .map(|g| g.name.to_string())
                 .collect::<Vec<_>>()
                 .join(", ");
             format!("<{}>", p)

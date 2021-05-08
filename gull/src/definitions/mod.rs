@@ -38,13 +38,17 @@ pub struct TMap {
     pub value: TMapValue,
 }
 
-#[derive(Debug, Clone)]
-pub struct TGeneric(pub &'static str);
+#[derive(Debug, Clone, Copy)]
+pub struct TGeneric {
+    pub name: &'static str,
+    pub bounds: Option<&'static str>,
+}
 
 #[derive(Debug, Clone)]
 pub enum TMapValue {
     TPrimitive(TPrimitive),
     Reference(TypeDeclaration),
+    TSet(TSet),
 }
 
 #[derive(Debug, Clone)]
