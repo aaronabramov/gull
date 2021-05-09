@@ -244,6 +244,8 @@ impl RustCodegen {
             TPrimitive::Ti64 => "i64".to_string(),
             TPrimitive::Tf64 => "f64".to_string(),
             TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
+            TPrimitive::THardcoded(s) => s.to_string(),
+            TPrimitive::TDifferentPerLanguege { rust, .. } => self.gen_primitive_type(&rust),
             TPrimitive::TReference { r, generic_params } => {
                 format!(
                     "{}{}",

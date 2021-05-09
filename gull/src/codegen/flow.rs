@@ -198,6 +198,8 @@ type {} = {{|{}\n|}};",
             TPrimitive::Ti64 => "number".to_string(),
             TPrimitive::Tf64 => "number".to_string(),
             TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
+            TPrimitive::THardcoded(s) => s.to_string(),
+            TPrimitive::TDifferentPerLanguege { flow, .. } => self.gen_primitive_type(&flow),
             TPrimitive::TReference { r, generic_params } => {
                 format!(
                     "{}{}",

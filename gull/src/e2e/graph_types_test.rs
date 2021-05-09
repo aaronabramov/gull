@@ -19,7 +19,21 @@ fn make_declarations() -> Declarations {
         name: "",
         docs: "",
         config: vec![],
-        value: DeclarationValue::CodeBlock(CodeBlock::Rust(vec!["use chrono::{DateTime, Utc};"])),
+        value: DeclarationValue::CodeBlock(CodeBlock::Rust(vec![
+            "use chrono::{DateTime, Utc};",
+            "use crate::types::{IndexedStr as _IndexedStr, ID as _ID};",
+        ])),
+    });
+
+    c.add(TypeDeclaration {
+        name: "ID",
+        docs: "",
+        config: vec![],
+        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguege {
+            rust: Box::new(TPrimitive::THardcoded("_ID")),
+            hack: Box::new(TPrimitive::Ti64),
+            flow: Box::new(TPrimitive::Ti64),
+        }),
     });
 
     c.add(TypeDeclaration {
@@ -203,6 +217,9 @@ use std::collections::HashMap;
 
 
 use chrono::{DateTime, Utc};
+use crate::types::{IndexedStr as _IndexedStr, ID as _ID};
+
+pub type ID = _ID;
 
 // ==========================================================================
 // Simple file defining various graph data types
@@ -255,6 +272,8 @@ fn hack_test() -> Result<()> {
 
 
 
+type NSID = int;
+
 // ==========================================================================
 // Simple file defining various graph data types
 // ==========================================================================
@@ -304,6 +323,8 @@ fn flow_test() -> Result<()> {
 
 
 
+
+export type ID = number;
 
 // ==========================================================================
 // Simple file defining various graph data types

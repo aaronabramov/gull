@@ -203,6 +203,8 @@ type {} = shape({}\n);",
             TPrimitive::Ti64 => "int".to_string(),
             TPrimitive::Tf64 => "float".to_string(),
             TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
+            TPrimitive::THardcoded(s) => s.to_string(),
+            TPrimitive::TDifferentPerLanguege { hack, .. } => self.gen_primitive_type(&hack),
             TPrimitive::TReference { r, generic_params } => {
                 format!(
                     "{}{}",

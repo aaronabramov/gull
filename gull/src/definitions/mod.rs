@@ -12,6 +12,12 @@ pub enum TPrimitive {
         r: TReference,
         generic_params: Vec<TGeneric>,
     },
+    THardcoded(&'static str),
+    TDifferentPerLanguege {
+        hack: Box<TPrimitive>,
+        rust: Box<TPrimitive>,
+        flow: Box<TPrimitive>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
