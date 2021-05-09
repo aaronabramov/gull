@@ -1,6 +1,8 @@
 [workspace]
 
 members = [
-    "gull",
+    "codegen_test",
     "docblock",
+    "gull_derive",
+    "gull",
 ]

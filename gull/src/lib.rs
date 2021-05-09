@@ -53,10 +53,12 @@ for more examples see `gull/e2e/basic_codegen_test.rs`
 
 mod codegen;
 mod definitions;
+
 pub mod generator;
 pub mod sign_source;
 
 pub use generator::write_generated;
+// pub use macros::EnumSerialization;
 
 pub mod prelude {
     pub use crate::codegen::*;
