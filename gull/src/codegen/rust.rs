@@ -79,8 +79,6 @@ impl RustCodegen {
                 )
             }
             DeclarationValue::TEnum(e) => {
-                // other representations are not possible to deserialize in PHP\JS
-                prefix.push_str("#[serde(tag = \"variant\")]\n");
                 format!("pub enum {} {}", declaration.name, self.gen_enum(e))
             }
             DeclarationValue::Docs => String::new(),
