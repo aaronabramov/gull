@@ -58,6 +58,7 @@ impl FlowCodegen {
                 )
             }
             DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
+            DeclarationValue::TSimpleEnum(e) => self.gen_simple_enum(&name, &e.variants),
             DeclarationValue::Docs => String::new(),
             DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
         };
@@ -131,6 +132,15 @@ impl FlowCodegen {
         format!("{{|{}\n{}|}}", fields, indent_prefix)
     }
 
+    fn gen_simple_enum(&self, name: &str, variants: &[&str]) -> String {
+        let ty = variants
+            .iter()
+            .map(|n| format!("\"{}\"", n))
+            .collect::<Vec<_>>()
+            .join(" | ");
+        format!("export type {} = {};", name, ty)
+    }
+
     fn gen_enum(&self, name: &str, e: &TEnum) -> String {
         let variant_types = e
             .variants
@@ -150,9 +160,8 @@ impl FlowCodegen {
 
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
-                EnumVariantType::Empty => "null".to_string(),
-                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
-                EnumVariantType::Primitive(p) => self.gen_primitive_type(p),
+                EnumVariantType::TStruct(s) => format!(" {}", self.gen_struct(s, 4)),
+                EnumVariantType::TPrimitive(p) => self.gen_primitive_type(p),
             };
 
             variant_type = format!("\n    '{}'?: {},", variant.name, variant_type);

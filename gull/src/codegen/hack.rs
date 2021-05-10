@@ -55,6 +55,7 @@ impl HackCodegen {
                 )
             }
             DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
+            DeclarationValue::TSimpleEnum(e) => self.gen_simple_enum(&name, &e.variants),
             DeclarationValue::Docs => String::new(),
             DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
         };
@@ -128,25 +129,30 @@ impl HackCodegen {
         format!("shape({}\n{})", fields, prefix)
     }
 
-    fn gen_enum(&self, name: &str, e: &TEnum) -> String {
-        let mut variant_types = vec![];
+    fn gen_simple_enum(&self, name: &str, variants: &[&str]) -> String {
+        let mut variant_lines = vec![];
 
-        for variant in &e.variants {
-            variant_types.push(format!(
+        for name in variants {
+            variant_lines.push(format!(
                 r#"    {} = "{}";{}"#,
-                variant.name.to_uppercase(),
-                variant.name,
+                name.to_uppercase(),
+                name,
                 "\n"
             ));
         }
 
+        format!(
+            "enum {}: string as string {{\n{}}}",
+            name,
+            variant_lines.join("")
+        )
+    }
+
+    fn gen_enum(&self, name: &str, e: &TEnum) -> String {
         let variant_type_enum_name = format!("{}Type", name);
 
-        let variant_type_hack_enum = format!(
-            "enum {}: string as string {{\n{}}}",
-            variant_type_enum_name,
-            variant_types.join("")
-        );
+        let variant_names = e.variants.iter().map(|v| v.name).collect::<Vec<_>>();
+        let simple_enum = self.gen_simple_enum(&variant_type_enum_name, &variant_names);
 
         let mut variants = String::new();
 
@@ -154,9 +160,8 @@ impl HackCodegen {
 
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
-                EnumVariantType::Empty => "null".to_string(),
-                EnumVariantType::Struct(s) => format!(" {}", self.gen_struct(s, 4)),
-                EnumVariantType::Primitive(p) => self.gen_primitive_type(p),
+                EnumVariantType::TStruct(s) => format!(" {}", self.gen_struct(s, 4)),
+                EnumVariantType::TPrimitive(p) => self.gen_primitive_type(p),
             };
 
             variant_type = format!("\n    ?'{}' => {},", variant.name, variant_type);
@@ -173,7 +178,7 @@ impl HackCodegen {
 {}
 
 type {} = shape({}\n);",
-            variant_type_hack_enum, name, variants
+            simple_enum, name, variants
         )
     }
 

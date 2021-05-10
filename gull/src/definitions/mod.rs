@@ -108,6 +108,7 @@ pub enum TypeDeclarationConfig {
 #[derive(Debug, Clone)]
 pub enum DeclarationValue {
     TEnum(TEnum),
+    TSimpleEnum(TSimpleEnum),
     TMap(Box<TMap>),
     TPrimitive(TPrimitive),
     TStruct(TStruct),
@@ -166,9 +167,33 @@ pub struct EnumVariant {
 
 #[derive(Debug, Clone)]
 pub enum EnumVariantType {
-    // NOTE: Tuples can't be supported because of
-    // complicated de\serialization rules.
-    Empty,
-    Struct(TStruct),
-    Primitive(TPrimitive),
+    // WARNING: This enum is pretty limited in what it can represent. Since hack
+    // and flow don't have enums, we need to be careful at how we represent the
+    // serialization of these enums on rust size. E.g.
+    // see https://serde.rs/enum-representations.html for details.
+    //
+    // Default representation puts current varariant as a key in a JSON object
+    // (e.g. {"MyVariant" => {"data": 1}})
+    //
+    // We can't have empty variants, since they would be represented as a single
+    // string in json by deault. e.g. `MyEnum::EmptyVariant` will serialize as
+    // just "EmtyVariant" string, which will mess up hack static typing. (it has
+    // no disjoint/distriminating unions)
+    //
+    // If we want to represent an empty enum on rust side, it HAS to have some
+    // data in it. so en Empty variant should be a primitive type with, e.g. a
+    // boolean type inside, so it serializes into `{"EmptyVariant": true}` and
+    // can be still represented as a shape/object on hack/js side.
+    TStruct(TStruct),
+    TPrimitive(TPrimitive),
+}
+
+/// This enum is an enum that has NO data associated with its variants.
+/// Basically like a C-like enum, where enum values are strings.
+/// It will serialize in a single string value (instead of the object/string
+/// stuff that we get with full featured enums). This easily maps to hack enums
+/// and flow string union types.
+#[derive(Debug, Clone)]
+pub struct TSimpleEnum {
+    pub variants: Vec<&'static str>,
 }

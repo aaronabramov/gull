@@ -29,6 +29,15 @@ fn make_declarations() -> Declarations {
     });
 
     c.add(TypeDeclaration {
+        name: "StorageType",
+        docs: "",
+        config: vec![],
+        value: DeclarationValue::TSimpleEnum(TSimpleEnum {
+            variants: vec!["Full", "Delta", "Empty", "Broken"],
+        }),
+    });
+
+    c.add(TypeDeclaration {
         name: "Operation",
         docs: "Operation is a single unit of transormation logic",
         config: vec![],
@@ -37,7 +46,7 @@ fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "Fetch",
                     docs: "Fetch items by their IDs",
-                    variant_type: EnumVariantType::Struct(TStruct {
+                    variant_type: EnumVariantType::TStruct(TStruct {
                         generic_params: vec![],
                         fields: vec![StructField {
                             name: "items",
@@ -50,7 +59,7 @@ fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "Store",
                     docs: "Store graphs to a storage layer",
-                    variant_type: EnumVariantType::Struct(TStruct {
+                    variant_type: EnumVariantType::TStruct(TStruct {
                         generic_params: vec![],
                         fields: vec![StructField {
                             name: "frames",
@@ -68,12 +77,12 @@ fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "Drop",
                     docs: "Discard all graphs",
-                    variant_type: EnumVariantType::Empty,
+                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Tbool),
                 },
                 EnumVariant {
                     name: "FakeOp",
                     docs: "Not a real operation",
-                    variant_type: EnumVariantType::Primitive(TPrimitive::Ti64),
+                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Ti64),
                 },
             ],
         }),
@@ -187,7 +196,13 @@ use std::collections::BTreeMap;
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 pub type Frame = (String, i64);
 
-#[serde(tag = "variant")]
+pub enum StorageType {
+    Full,
+    Delta,
+    Empty,
+    Broken,
+}
+
 /// Operation is a single unit of transormation logic
 pub enum Operation {
     /// Fetch items by their IDs
@@ -201,7 +216,7 @@ pub enum Operation {
         frames: Vec<Frame>,
     },
     /// Discard all graphs
-    Drop,
+    Drop(bool),
     /// Not a real operation
     FakeOp(i64),
 }
@@ -263,6 +278,13 @@ fn hack_test() -> Result<()> {
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type GraphiteIngesterFrame = (string, int);
 
+enum GraphiteIngesterStorageType: string as string {
+    FULL = "Full";
+    DELTA = "Delta";
+    EMPTY = "Empty";
+    BROKEN = "Broken";
+}
+
 // Operation is a single unit of transormation logic
 
 enum GraphiteIngesterOperationType: string as string {
@@ -285,7 +307,7 @@ type GraphiteIngesterOperation = shape(
         'frames' => vec<GraphiteIngesterFrame>,
     ),
     // Discard all graphs
-    ?'Drop' => null,
+    ?'Drop' => bool,
     // Not a real operation
     ?'FakeOp' => int,
 );
@@ -350,6 +372,8 @@ fn flow_test() -> Result<()> {
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID
 export type Frame = [string, number];
 
+export type StorageType = "Full" | "Delta" | "Empty" | "Broken";
+
 // Operation is a single unit of transormation logic
 type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 
@@ -366,7 +390,7 @@ type Operation = {|
         'frames': Array<Frame>,
     |},
     // Discard all graphs
-    'Drop'?: null,
+    'Drop'?: boolean,
     // Not a real operation
     'FakeOp'?: number,
 |};

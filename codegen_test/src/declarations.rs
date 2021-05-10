@@ -65,12 +65,12 @@ pub fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "OpInline",
                     docs: "",
-                    variant_type: EnumVariantType::Primitive(op_inline),
+                    variant_type: EnumVariantType::TPrimitive(op_inline),
                 },
                 EnumVariant {
                     name: "OpFetch",
                     docs: "",
-                    variant_type: EnumVariantType::Primitive(op_fetch),
+                    variant_type: EnumVariantType::TPrimitive(op_fetch),
                 },
             ],
         }),
