@@ -23,6 +23,7 @@ impl Declarations {
     pub fn add(&mut self, type_declaration: TypeDeclaration) -> TReference {
         let reference = TReference {
             name: type_declaration.name,
+            generic_params: vec![],
         };
         self.declarations.push(type_declaration);
         reference

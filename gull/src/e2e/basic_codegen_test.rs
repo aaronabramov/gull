@@ -28,6 +28,17 @@ fn make_declarations() -> Declarations {
         }),
     });
 
+    let indexable_str = c.add(TypeDeclaration {
+        name: "IndexableStr",
+        docs: "",
+        config: vec![],
+        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguege {
+            rust: Box::new(TPrimitive::THardcoded("crate::types::IndexableStr")),
+            hack: Box::new(TPrimitive::String),
+            flow: Box::new(TPrimitive::String),
+        }),
+    });
+
     c.add(TypeDeclaration {
         name: "StorageType",
         docs: "",
@@ -66,10 +77,7 @@ fn make_declarations() -> Declarations {
                             docs: "Destination frames for the storage",
                             config: vec![],
                             field_type: StructFieldType::TVec(TVec::TPrimitive(
-                                TPrimitive::TReference {
-                                    r: frame,
-                                    generic_params: vec![],
-                                },
+                                TPrimitive::TReference(frame),
                             )),
                         }],
                     }),
@@ -105,15 +113,12 @@ fn make_declarations() -> Declarations {
                 name: "node_id",
                 docs: "",
                 config: vec![],
-                field_type: StructFieldType::TPrimitive(TPrimitive::TReference {
-                    r: node_id,
-                    generic_params: vec![],
-                }),
+                field_type: StructFieldType::TPrimitive(TPrimitive::TReference(node_id)),
             }],
         }),
     });
 
-    c.add(TypeDeclaration {
+    let graph_data = c.add(TypeDeclaration {
         name: "GraphData",
         docs: r#"Wrapper value that represents a graph. It contains various top level
         data about the graph as well as a collection of nodes. This is a long
@@ -149,10 +154,7 @@ fn make_declarations() -> Declarations {
                     config: vec![],
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::Ti64,
-                        value: TMapValue::TPrimitive(TPrimitive::TReference {
-                            r: graph_node,
-                            generic_params: vec![],
-                        }),
+                        value: TMapValue::TPrimitive(TPrimitive::TReference(graph_node)),
                         t: TMapType::BTree,
                     }),
                 },
@@ -172,6 +174,19 @@ fn make_declarations() -> Declarations {
                 },
             ],
         }),
+    });
+
+    let mut graph_data_unindexed = graph_data;
+    graph_data_unindexed.generic_params = vec![
+        TGeneric::TReference(indexable_str.clone()),
+        TGeneric::TReference(indexable_str),
+    ];
+
+    c.add(TypeDeclaration {
+        name: "GraphDataUnindexed",
+        docs: "",
+        config: vec![],
+        value: DeclarationValue::TPrimitive(TPrimitive::TReference(graph_data_unindexed)),
     });
 
     c
@@ -195,6 +210,8 @@ use std::collections::BTreeMap;
 #[derive(Copy)]
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 pub type Frame = (String, i64);
+
+pub type IndexableStr = crate::types::IndexableStr;
 
 pub enum StorageType {
     Full,
@@ -255,6 +272,8 @@ pub struct GraphData {
     pub string_fields: Option<BTreeMap<String, String>>,
 }
 
+pub type GraphDataUnindexed = GraphData<IndexableStr, IndexableStr>;
+
 "#
     );
 
@@ -278,6 +297,8 @@ fn hack_test() -> Result<()> {
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID
 type GraphiteIngesterFrame = (string, int);
 
+type GraphiteIngesterIndexableStr = string;
+
 enum GraphiteIngesterStorageType: string as string {
     FULL = "Full";
     DELTA = "Delta";
@@ -295,7 +316,6 @@ enum GraphiteIngesterOperationType: string as string {
 }
 
 type GraphiteIngesterOperation = shape(
-    'type' => GraphiteIngesterOperationType,
     // Fetch items by their IDs
     ?'Fetch' =>  shape(
         // item IDs
@@ -345,6 +365,8 @@ type GraphiteIngesterGraphData = shape(
     'string_fields' => ?dict<string, string>,
 );
 
+type GraphiteIngesterGraphDataUnindexed = GraphiteIngesterGraphData<GraphiteIngesterIndexableStr, GraphiteIngesterIndexableStr>;
+
 "#
     );
 
@@ -371,6 +393,8 @@ fn flow_test() -> Result<()> {
 
 // Frame represents a tuple of an Timestamp (RFC3339) and an ID
 export type Frame = [string, number];
+
+export type IndexableStr = string;
 
 export type StorageType = "Full" | "Delta" | "Empty" | "Broken";
 
@@ -427,6 +451,8 @@ export type GraphData = {|
     // and other important lines of documentation.
     'string_fields': ?{[key: string]: string},
 |};
+
+export type GraphDataUnindexed = GraphData<IndexableStr, IndexableStr>;
 
 "#
     );

@@ -8,10 +8,7 @@ pub enum TPrimitive {
     Tf64,
     Tbool,
     TGeneric(TGeneric),
-    TReference {
-        r: TReference,
-        generic_params: Vec<TGeneric>,
-    },
+    TReference(TReference),
     THardcoded(&'static str),
     TDifferentPerLanguege {
         hack: Box<TPrimitive>,
@@ -20,10 +17,11 @@ pub enum TPrimitive {
     },
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct TReference {
     // private field. must be returned by declarations
     name: &'static str,
+    pub generic_params: Vec<TGeneric>,
 }
 
 impl TReference {
@@ -31,11 +29,8 @@ impl TReference {
         self.name
     }
 
-    pub fn primitive(&self, generic_params: Vec<TGeneric>) -> TPrimitive {
-        TPrimitive::TReference {
-            r: *self,
-            generic_params,
-        }
+    pub fn primitive(&self) -> TPrimitive {
+        TPrimitive::TReference(self.clone())
     }
 }
 
@@ -70,10 +65,16 @@ pub struct TMap {
     pub t: TMapType,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct TGeneric {
-    pub name: &'static str,
-    pub bounds: Option<&'static str>,
+#[derive(Debug, Clone)]
+pub enum TGeneric {
+    // Params that are defined and used within struct/type. no namespacing
+    // needed etc.
+    TDefinition {
+        name: &'static str,
+        bounds: Option<&'static str>,
+    },
+    // generic param that references ather thing. e.g. Vec<OtherTypeReference>
+    TReference(TReference),
 }
 
 #[derive(Debug, Clone)]
@@ -150,7 +151,6 @@ pub enum StructFieldType {
     TPrimitive(TPrimitive),
     TTuple(TTuple),
     TVec(TVec),
-    TGeneric(TGeneric),
 }
 
 #[derive(Debug, Clone)]

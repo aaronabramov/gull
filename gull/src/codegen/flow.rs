@@ -53,7 +53,7 @@ impl FlowCodegen {
                 format!(
                     "export type {}{} = {};",
                     name,
-                    self.gen_generic_params(&s.generic_params),
+                    shared::generic_params(&s.generic_params, |g| self.gen_generic(g)),
                     self.gen_struct(s, 0)
                 )
             }
@@ -117,7 +117,6 @@ impl FlowCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
-                StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
             };
 
             field_type = format!("\n    {}'{}': {},", &indent_prefix, field.name, field_type);
@@ -206,14 +205,14 @@ type {} = {{|{}\n|}};",
             TPrimitive::Tbool => "boolean".to_string(),
             TPrimitive::Ti64 => "number".to_string(),
             TPrimitive::Tf64 => "number".to_string(),
-            TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
             TPrimitive::THardcoded(s) => s.to_string(),
             TPrimitive::TDifferentPerLanguege { flow, .. } => self.gen_primitive_type(&flow),
-            TPrimitive::TReference { r, generic_params } => {
+            TPrimitive::TGeneric(g) => self.gen_generic(g),
+            TPrimitive::TReference(r) => {
                 format!(
                     "{}{}",
                     r.get_name(),
-                    shared::generic_params(&generic_params)
+                    shared::generic_params(&r.generic_params, |g| self.gen_generic(g))
                 )
             }
         }
@@ -223,16 +222,12 @@ type {} = {{|{}\n|}};",
         d.name.to_string()
     }
 
-    fn gen_generic_params(&self, params: &[TGeneric]) -> String {
-        if params.is_empty() {
-            String::new()
-        } else {
-            let p = params
-                .iter()
-                .map(|g| g.name.to_string())
-                .collect::<Vec<_>>()
-                .join(", ");
-            format!("<{}>", p)
+    fn gen_generic(&self, g: &TGeneric) -> String {
+        match g {
+            TGeneric::TDefinition { name, .. } => name.to_string(),
+            TGeneric::TReference(r, ..) => {
+                self.gen_primitive_type(&TPrimitive::TReference(r.clone()))
+            }
         }
     }
 

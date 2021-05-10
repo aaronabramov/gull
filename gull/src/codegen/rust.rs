@@ -74,7 +74,7 @@ impl RustCodegen {
                 format!(
                     "pub struct {}{} {}",
                     declaration.name,
-                    self.gen_generic_params(&s.generic_params),
+                    self.gen_generic_param_definitions(&s.generic_params),
                     self.gen_struct(s, 0, true)
                 )
             }
@@ -177,7 +177,6 @@ impl RustCodegen {
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
-                StructFieldType::TGeneric(TGeneric { name, .. }) => name.to_string(),
             });
 
             let visibility = if pub_fields { "pub " } else { "" };
@@ -252,31 +251,44 @@ impl RustCodegen {
             TPrimitive::Tbool => "bool".to_string(),
             TPrimitive::Ti64 => "i64".to_string(),
             TPrimitive::Tf64 => "f64".to_string(),
-            TPrimitive::TGeneric(TGeneric { name, .. }) => name.to_string(),
             TPrimitive::THardcoded(s) => s.to_string(),
             TPrimitive::TDifferentPerLanguege { rust, .. } => self.gen_primitive_type(&rust),
-            TPrimitive::TReference { r, generic_params } => {
+            TPrimitive::TGeneric(g) => self.gen_generic(g),
+            TPrimitive::TReference(r) => {
                 format!(
                     "{}{}",
                     r.get_name(),
-                    shared::generic_params(&generic_params)
+                    shared::generic_params(&r.generic_params, |g| self.gen_generic(g))
                 )
             }
         }
     }
 
-    fn gen_generic_params(&self, params: &[TGeneric]) -> String {
+    fn gen_generic(&self, g: &TGeneric) -> String {
+        match g {
+            TGeneric::TDefinition { name, .. } => name.to_string(),
+            TGeneric::TReference(r, ..) => {
+                self.gen_primitive_type(&TPrimitive::TReference(r.clone()))
+            }
+        }
+    }
+
+    fn gen_generic_param_definitions(&self, params: &[TGeneric]) -> String {
         if params.is_empty() {
             String::new()
         } else {
             let p = params
                 .iter()
-                .map(|TGeneric { name, bounds }| {
-                    format!(
-                        "{}{}",
-                        name,
-                        bounds.map_or(String::new(), |b| format!(": {}", b))
-                    )
+                .map(|g| {
+                    if let TGeneric::TDefinition { name, bounds } = g {
+                        format!(
+                            "{}{}",
+                            name,
+                            bounds.map_or(String::new(), |b| format!(": {}", b))
+                        )
+                    } else {
+                        panic!("Generic param definitiens only accept TGeneric::TDefinition!");
+                    }
                 })
                 .collect::<Vec<_>>()
                 .join(", ");

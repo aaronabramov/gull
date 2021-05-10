@@ -60,17 +60,17 @@ fn make_declarations() -> Declarations {
         value: DeclarationValue::TPrimitive(TPrimitive::String),
     });
 
-    let t_generic = TGeneric {
+    let t_generic = TGeneric::TDefinition {
         name: "T",
         bounds: None,
     };
 
-    let ts_generic = TGeneric {
+    let ts_generic = TGeneric::TDefinition {
         name: "TS",
         bounds: Some("Ord"),
     };
 
-    let tn_generic = TGeneric {
+    let tn_generic = TGeneric::TDefinition {
         name: "TN",
         bounds: Some("Ord"),
     };
@@ -80,14 +80,16 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![struct_derives_eq_ord],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![ts_generic, tn_generic],
+            generic_params: vec![ts_generic.clone(), tn_generic.clone()],
             fields: vec![
                 StructField {
                     name: "branches",
                     docs: "",
                     field_type: StructFieldType::TMap(TMap {
-                        key: TPrimitive::TGeneric(ts_generic),
-                        value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(tn_generic))),
+                        key: TPrimitive::TGeneric(ts_generic.clone()),
+                        value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(
+                            tn_generic.clone(),
+                        ))),
                         t: TMapType::BTree,
                     }),
                     config: vec![],
@@ -96,8 +98,10 @@ fn make_declarations() -> Declarations {
                     name: "properties",
                     docs: "",
                     field_type: StructFieldType::TOption(TOption::TMap(TMap {
-                        key: TPrimitive::TGeneric(ts_generic),
-                        value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(ts_generic))),
+                        key: TPrimitive::TGeneric(ts_generic.clone()),
+                        value: TMapValue::TSet(TSet::TPrimitive(TPrimitive::TGeneric(
+                            ts_generic.clone(),
+                        ))),
                         t: TMapType::BTree,
                     })),
                     config: vec![],
@@ -111,23 +115,20 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![ts_generic, tn_generic],
+            generic_params: vec![ts_generic.clone(), tn_generic.clone()],
             fields: vec![
                 StructField {
                     name: "directed",
                     docs: "",
                     field_type: StructFieldType::TSet(TSet::TPrimitive(TPrimitive::TGeneric(
-                        tn_generic,
+                        tn_generic.clone(),
                     ))),
                     config: vec![],
                 },
                 StructField {
                     name: "dynamic",
                     docs: "",
-                    field_type: StructFieldType::TPrimitive(TPrimitive::TReference {
-                        r: dynamic_edge,
-                        generic_params: vec![],
-                    }),
+                    field_type: StructFieldType::TPrimitive(TPrimitive::TReference(dynamic_edge)),
                     config: vec![],
                 },
                 StructField {
@@ -149,22 +150,21 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![t_generic],
+            generic_params: vec![t_generic.clone()],
             fields: vec![
                 StructField {
                     name: "name",
                     docs: "",
-                    field_type: StructFieldType::TGeneric(t_generic),
+                    field_type: StructFieldType::TPrimitive(TPrimitive::TGeneric(
+                        t_generic.clone(),
+                    )),
                     config: vec![],
                 },
                 StructField {
                     name: "edges",
                     docs: "",
                     field_type: StructFieldType::TOption(TOption::TPrimitive(
-                        TPrimitive::TReference {
-                            r: node_edges,
-                            generic_params: vec![],
-                        },
+                        TPrimitive::TReference(node_edges),
                     )),
                     config: vec![skip_serializing_none],
                 },
@@ -177,17 +177,14 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![struct_derives],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![t_generic],
+            generic_params: vec![t_generic.clone()],
             fields: vec![
                 StructField {
                     name: "nodes",
                     docs: "",
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::TGeneric(t_generic),
-                        value: TMapValue::TPrimitive(TPrimitive::TReference {
-                            r: node,
-                            generic_params: vec![],
-                        }),
+                        value: TMapValue::TPrimitive(TPrimitive::TReference(node)),
                         t: TMapType::Hash,
                     }),
                     config: vec![],

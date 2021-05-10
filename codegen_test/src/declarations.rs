@@ -29,7 +29,7 @@ pub fn make_declarations() -> Declarations {
                 }],
             }),
         })
-        .primitive(vec![]);
+        .primitive();
 
     let op_fetch = d
         .add(TypeDeclaration {
@@ -54,7 +54,7 @@ pub fn make_declarations() -> Declarations {
                 ],
             }),
         })
-        .primitive(vec![]);
+        .primitive();
 
     d.add(TypeDeclaration {
         name: "OperationsEnum",
