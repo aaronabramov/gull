@@ -156,8 +156,6 @@ impl HackCodegen {
 
         let mut variants = String::new();
 
-        variants.push_str(&format!("\n    'type' => {},", variant_type_enum_name));
-
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
                 EnumVariantType::TStruct(s) => format!(" {}", self.gen_struct(s, 4)),
