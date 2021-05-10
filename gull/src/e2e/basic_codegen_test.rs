@@ -362,7 +362,7 @@ type GraphiteIngesterGraphData = shape(
     // A bunch of random string fields
     // that are represented as a map between string and string
     // and other important lines of documentation.
-    'string_fields' => ?dict<string, string>,
+    ?'string_fields' => dict<string, string>,
 );
 
 type GraphiteIngesterGraphDataUnindexed = GraphiteIngesterGraphData<GraphiteIngesterIndexableStr, GraphiteIngesterIndexableStr>;

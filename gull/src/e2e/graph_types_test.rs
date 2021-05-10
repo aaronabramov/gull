@@ -282,18 +282,18 @@ type NSNodeName = string;
 
 type NSDynamicEdge<TS, TN> = shape(
     'branches' => dict<TS, keyset<TN>>,
-    'properties' => ?dict<TS, keyset<TS>>,
+    ?'properties' => dict<TS, keyset<TS>>,
 );
 
 type NSNodeEdges<TS, TN> = shape(
     'directed' => keyset<TN>,
     'dynamic' => NSDynamicEdge,
-    'tagged' => ?dict<TS, keyset<TN>>,
+    ?'tagged' => dict<TS, keyset<TN>>,
 );
 
 type NSGraphNode<T> = shape(
     'name' => T,
-    'edges' => ?NSNodeEdges,
+    ?'edges' => NSNodeEdges,
 );
 
 type NSGraph<T> = shape(

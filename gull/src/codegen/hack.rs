@@ -92,13 +92,16 @@ impl HackCodegen {
     }
 
     fn gen_option(&self, o: &TOption) -> String {
-        let value = match &o {
+        format!("?{}", self.gen_option_value(o))
+    }
+
+    fn gen_option_value(&self, o: &TOption) -> String {
+        match &o {
             TOption::TPrimitive(p) => self.gen_primitive_type(&p),
             TOption::TMap(m) => self.gen_map(m),
             TOption::TVec(v) => self.gen_vec(v),
             TOption::TSet(s) => self.gen_set(s),
-        };
-        format!("?{}", value)
+        }
     }
 
     fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
@@ -106,17 +109,25 @@ impl HackCodegen {
 
         let prefix = " ".repeat(indent);
 
+        let mut is_option = "";
+
         for field in &s.fields {
             let mut field_type = match &field.field_type {
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TSet(s) => self.gen_set(s),
-                StructFieldType::TOption(o) => self.gen_option(o),
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
+                StructFieldType::TOption(o) => {
+                    is_option = "?";
+                    self.gen_option_value(o)
+                }
             };
 
-            field_type = format!("\n    {}'{}' => {},", &prefix, field.name, field_type);
+            field_type = format!(
+                "\n    {}{}'{}' => {},",
+                &prefix, is_option, field.name, field_type
+            );
 
             if let Some(doc) = format_docstring(field.docs, CommentStyle::DoubleSlash, indent + 4) {
                 field_type = format!("\n{}{}", doc, field_type);
