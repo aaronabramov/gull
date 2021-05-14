@@ -100,6 +100,7 @@ impl FlowCodegen {
             TOption::TMap(m) => self.gen_map(m),
             TOption::TVec(v) => self.gen_vec(v),
             TOption::TSet(s) => self.gen_set(s),
+            TOption::TTuple(t) => self.gen_tuple(t),
         };
         format!("?{}", value)
     }
@@ -188,6 +189,7 @@ type {} = {{|{}\n|}};",
 
             let value = match item {
                 TupleItem::TPrimitive(p) => self.gen_primitive_type(p).to_string(),
+                TupleItem::TOption(o) => self.gen_option(o),
             };
 
             values.push_str(&value);

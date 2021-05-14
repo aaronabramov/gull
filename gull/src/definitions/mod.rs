@@ -40,6 +40,7 @@ pub enum TOption {
     TPrimitive(TPrimitive),
     TSet(TSet),
     TVec(TVec),
+    TTuple(TTuple),
 }
 
 #[derive(Debug, Clone)]
@@ -91,6 +92,7 @@ pub struct TTuple {
 #[derive(Debug, Clone)]
 pub enum TupleItem {
     TPrimitive(TPrimitive),
+    TOption(TOption),
 }
 
 #[derive(Debug, Clone)]
