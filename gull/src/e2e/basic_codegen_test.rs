@@ -13,6 +13,7 @@ fn make_declarations() -> Declarations {
         THIS IS AN INDEPENDENT DOCUMENTATION BLOCK
         ==========================================================================",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::Docs,
     });
 
@@ -20,6 +21,7 @@ fn make_declarations() -> Declarations {
         name: "Frame",
         docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
         config: vec![TypeDeclarationConfig::RustAttribute("#[derive(Copy)]")],
+        generic_params: vec![],
         value: DeclarationValue::TTuple(TTuple {
             items: vec![
                 TupleItem::TPrimitive(TPrimitive::String),
@@ -32,6 +34,7 @@ fn make_declarations() -> Declarations {
         name: "IndexableStr",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguege {
             rust: Box::new(TPrimitive::THardcoded("crate::types::IndexableStr")),
             hack: Box::new(TPrimitive::String),
@@ -43,6 +46,7 @@ fn make_declarations() -> Declarations {
         name: "StorageType",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TSimpleEnum(TSimpleEnum {
             variants: vec!["Full", "Delta", "Empty", "Broken"],
         }),
@@ -52,13 +56,13 @@ fn make_declarations() -> Declarations {
         name: "Operation",
         docs: "Operation is a single unit of transormation logic",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TEnum(TEnum {
             variants: vec![
                 EnumVariant {
                     name: "Fetch",
                     docs: "Fetch items by their IDs",
                     variant_type: EnumVariantType::TStruct(TStruct {
-                        generic_params: vec![],
                         fields: vec![StructField {
                             name: "items",
                             docs: "item IDs",
@@ -71,7 +75,6 @@ fn make_declarations() -> Declarations {
                     name: "Store",
                     docs: "Store graphs to a storage layer",
                     variant_type: EnumVariantType::TStruct(TStruct {
-                        generic_params: vec![],
                         fields: vec![StructField {
                             name: "frames",
                             docs: "Destination frames for the storage",
@@ -100,6 +103,7 @@ fn make_declarations() -> Declarations {
         name: "NodeID",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
     });
 
@@ -107,8 +111,8 @@ fn make_declarations() -> Declarations {
         name: "GraphNode",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![],
             fields: vec![StructField {
                 name: "node_id",
                 docs: "",
@@ -139,8 +143,8 @@ fn make_declarations() -> Declarations {
         Maybe some extra line after a newline.
         "#,
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![],
             fields: vec![
                 StructField {
                     name: "entry_points",
@@ -186,6 +190,7 @@ fn make_declarations() -> Declarations {
         name: "GraphDataUnindexed",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::TReference(graph_data_unindexed)),
     });
 

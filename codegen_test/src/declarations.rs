@@ -19,8 +19,8 @@ pub fn make_declarations() -> Declarations {
             name: "OpInline",
             docs: "",
             config: vec![derives(vec!["serde::Serialize", "serde::Deserialize"])],
+            generic_params: vec![],
             value: DeclarationValue::TStruct(TStruct {
-                generic_params: vec![],
                 fields: vec![StructField {
                     name: "graphs",
                     docs: "",
@@ -36,8 +36,8 @@ pub fn make_declarations() -> Declarations {
             name: "OpFetch",
             docs: "",
             config: vec![derives(vec!["serde::Serialize", "serde::Deserialize"])],
+            generic_params: vec![],
             value: DeclarationValue::TStruct(TStruct {
-                generic_params: vec![],
                 fields: vec![
                     StructField {
                         name: "timeline_key",
@@ -60,6 +60,7 @@ pub fn make_declarations() -> Declarations {
         name: "OperationsEnum",
         docs: "",
         config: vec![derives(vec!["serde::Serialize", "serde::Deserialize"])],
+        generic_params: vec![],
         value: DeclarationValue::TEnum(TEnum {
             variants: vec![
                 EnumVariant {

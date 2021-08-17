@@ -30,6 +30,7 @@ declarations.add(TypeDeclaration {
     name: "Frame",
     docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
     config: vec![TypeDeclarationConfig::RustAttribute("#[derive(Copy)]")],
+    generic_params: vec![],
     value: DeclarationValue::TTuple(TTuple {
         items: vec![
             TupleItem::TPrimitive(TPrimitive::String),

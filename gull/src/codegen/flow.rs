@@ -41,19 +41,34 @@ impl FlowCodegen {
         let name = self.gen_name(&declaration);
         let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => {
-                format!("export type {} = {};", name, self.gen_primitive_type(p))
+                format!(
+                    "export type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_primitive_type(p)
+                )
             }
             DeclarationValue::TMap(m) => {
-                format!("export type {} = {};", name, self.gen_map(m))
+                format!(
+                    "export type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_map(m)
+                )
             }
             DeclarationValue::TTuple(t) => {
-                format!("export type {} = {};", name, self.gen_tuple(t))
+                format!(
+                    "export type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_tuple(t)
+                )
             }
             DeclarationValue::TStruct(s) => {
                 format!(
                     "export type {}{} = {};",
                     name,
-                    shared::generic_params(&s.generic_params, |g| self.gen_generic(g)),
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
                     self.gen_struct(s, 0)
                 )
             }

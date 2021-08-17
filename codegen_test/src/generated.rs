@@ -1,3 +1,5 @@
+
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct OpInline {
     pub graphs: Vec<String>,
@@ -10,7 +12,6 @@ pub struct OpFetch {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
-#[serde(tag = "variant")]
 pub enum OperationsEnum {
     OpInline(OpInline),
     OpFetch(OpFetch),

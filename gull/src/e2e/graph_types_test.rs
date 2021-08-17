@@ -19,6 +19,7 @@ fn make_declarations() -> Declarations {
         name: "",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::CodeBlock(CodeBlock::Rust(vec![
             "use chrono::{DateTime, Utc};",
             "use crate::types::{IndexedStr as _IndexedStr, ID as _ID};",
@@ -29,6 +30,7 @@ fn make_declarations() -> Declarations {
         name: "ID",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguege {
             rust: Box::new(TPrimitive::THardcoded("_ID")),
             hack: Box::new(TPrimitive::Ti64),
@@ -43,6 +45,7 @@ fn make_declarations() -> Declarations {
         Simple file defining various graph data types
         ==========================================================================",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::Docs,
     });
 
@@ -50,6 +53,7 @@ fn make_declarations() -> Declarations {
         name: "NodeID",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
     });
 
@@ -57,6 +61,7 @@ fn make_declarations() -> Declarations {
         name: "NodeName",
         docs: "",
         config: vec![],
+        generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::String),
     });
 
@@ -79,8 +84,8 @@ fn make_declarations() -> Declarations {
         name: "DynamicEdge",
         docs: "",
         config: vec![struct_derives_eq_ord],
+        generic_params: vec![ts_generic.clone(), tn_generic.clone()],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![ts_generic.clone(), tn_generic.clone()],
             fields: vec![
                 StructField {
                     name: "branches",
@@ -114,8 +119,8 @@ fn make_declarations() -> Declarations {
         name: "NodeEdges",
         docs: "",
         config: vec![struct_derives],
+        generic_params: vec![ts_generic.clone(), tn_generic.clone()],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![ts_generic.clone(), tn_generic.clone()],
             fields: vec![
                 StructField {
                     name: "directed",
@@ -149,8 +154,8 @@ fn make_declarations() -> Declarations {
         name: "GraphNode",
         docs: "",
         config: vec![struct_derives],
+        generic_params: vec![t_generic.clone()],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![t_generic.clone()],
             fields: vec![
                 StructField {
                     name: "name",
@@ -172,18 +177,18 @@ fn make_declarations() -> Declarations {
         }),
     });
 
-    c.add(TypeDeclaration {
+    let graph = c.add(TypeDeclaration {
         name: "Graph",
         docs: "",
         config: vec![struct_derives],
+        generic_params: vec![t_generic.clone()],
         value: DeclarationValue::TStruct(TStruct {
-            generic_params: vec![t_generic.clone()],
             fields: vec![
                 StructField {
                     name: "nodes",
                     docs: "",
                     field_type: StructFieldType::TMap(TMap {
-                        key: TPrimitive::TGeneric(t_generic),
+                        key: TPrimitive::TGeneric(t_generic.clone()),
                         value: TMapValue::TPrimitive(TPrimitive::TReference(node)),
                         t: TMapType::Hash,
                     }),
@@ -197,6 +202,17 @@ fn make_declarations() -> Declarations {
                 },
             ],
         }),
+    });
+
+    let mut generic_graph = graph;
+    generic_graph.generic_params = vec![t_generic.clone()];
+
+    c.add(TypeDeclaration {
+        name: "GraphProxyType",
+        docs: "",
+        config: vec![],
+        generic_params: vec![t_generic],
+        value: DeclarationValue::TPrimitive(generic_graph.primitive()),
     });
 
     c
@@ -253,6 +269,8 @@ pub struct Graph<T> {
     pub timestamp: DateTime<Utc>,
 }
 
+pub type GraphProxyType<T> = Graph<T>;
+
 "#
     );
 
@@ -300,6 +318,8 @@ type NSGraph<T> = shape(
     'nodes' => dict<T, NSGraphNode>,
     'timestamp' => string,
 );
+
+type NSGraphProxyType<T> = NSGraph<T>;
 
 "
     );
@@ -352,6 +372,8 @@ export type Graph<T> = {|
     'nodes': {[key: T]: GraphNode},
     'timestamp': string,
 |};
+
+export type GraphProxyType<T> = Graph<T>;
 
 "
     );

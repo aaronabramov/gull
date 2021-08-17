@@ -101,6 +101,7 @@ pub struct TypeDeclaration {
     pub docs: &'static str,
     pub value: DeclarationValue,
     pub config: Vec<TypeDeclarationConfig>,
+    pub generic_params: Vec<TGeneric>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -127,7 +128,6 @@ pub enum CodeBlock {
 
 #[derive(Debug, Clone)]
 pub struct TStruct {
-    pub generic_params: Vec<TGeneric>,
     pub fields: Vec<StructField>,
 }
 

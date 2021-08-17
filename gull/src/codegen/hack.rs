@@ -38,19 +38,34 @@ impl HackCodegen {
         let name = self.gen_namespaced_name(declaration.name);
         let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => {
-                format!("type {} = {};", name, self.gen_primitive_type(p))
+                format!(
+                    "type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_primitive_type(p)
+                )
             }
             DeclarationValue::TMap(m) => {
-                format!("type {} = {};", name, self.gen_map(m))
+                format!(
+                    "type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_map(m)
+                )
             }
             DeclarationValue::TTuple(t) => {
-                format!("type {} = {};", name, self.gen_tuple(t))
+                format!(
+                    "type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_tuple(t)
+                )
             }
             DeclarationValue::TStruct(s) => {
                 format!(
                     "type {}{} = {};",
                     name,
-                    shared::generic_params(&s.generic_params, |g| self.gen_generic(g)),
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
                     self.gen_struct(s, 0)
                 )
             }

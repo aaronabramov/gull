@@ -60,21 +60,32 @@ impl RustCodegen {
 
         let mut r = match &declaration.value {
             DeclarationValue::TPrimitive(p) => format!(
-                "pub type {} = {};",
+                "pub type {}{} = {};",
                 declaration.name,
+                self.gen_generic_param_definitions(&declaration.generic_params),
                 self.gen_primitive_type(p)
             ),
             DeclarationValue::TMap(m) => {
-                format!("pub type {} = {};", declaration.name, self.gen_map(m))
+                format!(
+                    "pub type {}{} = {};",
+                    declaration.name,
+                    self.gen_generic_param_definitions(&declaration.generic_params),
+                    self.gen_map(m)
+                )
             }
             DeclarationValue::TTuple(t) => {
-                format!("pub type {} = {};", declaration.name, self.gen_tuple(t))
+                format!(
+                    "pub type {}{} = {};",
+                    declaration.name,
+                    self.gen_generic_param_definitions(&declaration.generic_params),
+                    self.gen_tuple(t)
+                )
             }
             DeclarationValue::TStruct(s) => {
                 format!(
                     "pub struct {}{} {}",
                     declaration.name,
-                    self.gen_generic_param_definitions(&s.generic_params),
+                    self.gen_generic_param_definitions(&declaration.generic_params),
                     self.gen_struct(s, 0, true)
                 )
             }
