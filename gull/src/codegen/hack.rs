@@ -144,6 +144,8 @@ impl HackCodegen {
                 "\n    {}{}'{}' => {},",
                 &prefix, is_option, field.name, field_type
             );
+            // reset option so that other fields after it don't all become options
+            is_option = "";
 
             if let Some(doc) = format_docstring(field.docs, CommentStyle::DoubleSlash, indent + 4) {
                 field_type = format!("\n{}{}", doc, field_type);
