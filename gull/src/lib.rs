@@ -3,7 +3,6 @@
 
 /*!
 
-
 [![Crates.io][crates-badge]][crates-url]
 [![Docs.rs][docs-badge]][docs-url]
 ![Rust CI](https://github.com/aaronabramov/gull/workflows/Rust%20CI/badge.svg)
@@ -12,7 +11,6 @@
 [crates-url]: https://crates.io/crates/gull
 [docs-badge]: https://docs.rs/gull/badge.svg
 [docs-url]: https://docs.rs/gull
-lol?
 
 `Gull` is a tool that takes abstract static type definitions and generates
 static types definitions into multiple languages.
