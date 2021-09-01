@@ -291,7 +291,7 @@ fn hack_test() -> Result<()> {
     k9::snapshot!(
         declarations.codegen_hack()?,
         r#"
-<?hh // strict
+<?hh
 
 // Hello world
 // ==========================================================================
@@ -384,11 +384,6 @@ fn flow_test() -> Result<()> {
     k9::snapshot!(
         declarations.codegen_flow()?,
         r#"
-/*
- * @flow
- * @nolint
- */
-
 
 // Hello world
 // ==========================================================================

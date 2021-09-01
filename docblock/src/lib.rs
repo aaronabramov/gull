@@ -1,3 +1,61 @@
+/*!
+
+
+[![Crates.io][crates-badge]][crates-url]
+[![Docs.rs][docs-badge]][docs-url]
+![Rust CI](https://github.com/aaronabramov/gull/workflows/Rust%20CI/badge.svg)
+
+[crates-badge]: https://img.shields.io/crates/v/docblock.svg
+[crates-url]: https://crates.io/crates/docblock
+[docs-badge]: https://docs.rs/docblock/badge.svg
+[docs-url]: https://docs.rs/docblock
+
+`Docblock` is a crate that provides a simple API to parse and modify
+dockblocks and configuration pragrmas in it.
+
+Example:
+```
+
+use docblock::SourceFile;
+use k9::snapshot;
+
+let source = "
+/*
+ * @typechecks true
+ * Some documentation and stuff
+ */
+
+use a::b::c;
+let a = 1 + 1;
+";
+
+let mut source_file = SourceFile::from_source(source);
+source_file.set_directive("dog", Some("cat"));
+source_file.set_directive("hello", Some("world"));
+source_file.set_directive("flow", None);
+source_file.add_text("Some more documentation?");
+
+snapshot!(
+    source_file.to_source(),
+"
+/*
+ * @typechecks true
+ * @dog cat
+ * @hello world
+ * @flow
+ * Some documentation and stuff
+ * Some more documentation?
+ */
+
+use a::b::c;
+let a = 1 + 1;
+
+");
+```
+
+
+*/
+
 use lazy_static::lazy_static;
 use regex::{Regex, RegexBuilder};
 
@@ -143,7 +201,7 @@ impl SourceFile {
             for line in &self.doc_block {
                 result.push_str(" * ");
                 match line {
-                    Line::Text(t) => result.push_str(&t),
+                    Line::Text(t) => result.push_str(t),
                     Line::Directive { key, value } => result.push_str(
                         format!(
                             "@{} {}",

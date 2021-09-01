@@ -12,7 +12,7 @@ impl Codegen for HackCodegen {
     fn gen_declarations(declarations: &Declarations) -> Result<String> {
         let mut rc = HackCodegen { namespace: "" };
 
-        let mut declarations_code = String::from("<?hh // strict\n");
+        let mut declarations_code = String::from("<?hh\n");
 
         for config in &declarations.config {
             match config {
