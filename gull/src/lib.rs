@@ -12,6 +12,8 @@
 [docs-badge]: https://docs.rs/gull/badge.svg
 [docs-url]: https://docs.rs/gull
 
+![gull_header](https://user-images.githubusercontent.com/940133/94375072-8dfb7380-00d6-11eb-8611-a2d8d794ef3b.png)
+
 `Gull` is a tool that takes abstract static type definitions and generates
 static types definitions into multiple languages.
 Currently supported languages: Rust, Hack (PHP), Flow (unstable)
