@@ -53,6 +53,22 @@ impl HackCodegen {
                     self.gen_map(m)
                 )
             }
+            DeclarationValue::TVec(v) => {
+                format!(
+                    "type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_vec(v)
+                )
+            }
+            DeclarationValue::TOption(o) => {
+                format!(
+                    "type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_option(o)
+                )
+            }
             DeclarationValue::TTuple(t) => {
                 format!(
                     "type {}{} = {};",
@@ -235,6 +251,9 @@ type {} = shape({}\n);",
             TPrimitive::Ti64 => "int".to_string(),
             TPrimitive::Tf64 => "float".to_string(),
             TPrimitive::THardcoded(s) => s.to_string(),
+            TPrimitive::TVec(v) => self.gen_vec(v),
+            TPrimitive::TMap(m) => self.gen_map(m),
+            TPrimitive::TOption(o) => self.gen_option(o),
             TPrimitive::TDifferentPerLanguege { hack, .. } => self.gen_primitive_type(&hack),
             TPrimitive::TGeneric(g) => self.gen_generic(g),
             TPrimitive::TReference(r) => {

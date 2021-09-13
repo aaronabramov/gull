@@ -81,6 +81,22 @@ impl RustCodegen {
                     self.gen_tuple(t)
                 )
             }
+            DeclarationValue::TVec(v) => {
+                format!(
+                    "pub type {}{} = {};",
+                    declaration.name,
+                    self.gen_generic_param_definitions(&declaration.generic_params),
+                    self.gen_vec(v)
+                )
+            }
+            DeclarationValue::TOption(o) => {
+                format!(
+                    "pub type {}{} = {};",
+                    declaration.name,
+                    self.gen_generic_param_definitions(&declaration.generic_params),
+                    self.gen_option(o)
+                )
+            }
             DeclarationValue::TStruct(s) => {
                 format!(
                     "pub struct {}{} {}",
@@ -266,6 +282,9 @@ impl RustCodegen {
             TPrimitive::Tf64 => "f64".to_string(),
             TPrimitive::THardcoded(s) => s.to_string(),
             TPrimitive::TDifferentPerLanguege { rust, .. } => self.gen_primitive_type(&rust),
+            TPrimitive::TMap(m) => self.gen_map(m),
+            TPrimitive::TVec(v) => self.gen_vec(v),
+            TPrimitive::TOption(o) => self.gen_option(o),
             TPrimitive::TGeneric(g) => self.gen_generic(g),
             TPrimitive::TReference(r) => {
                 format!(

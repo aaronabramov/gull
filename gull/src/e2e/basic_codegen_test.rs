@@ -158,7 +158,7 @@ fn make_declarations() -> Declarations {
                     config: vec![],
                     field_type: StructFieldType::TMap(TMap {
                         key: TPrimitive::Ti64,
-                        value: TMapValue::TPrimitive(TPrimitive::TReference(graph_node)),
+                        value: TMapValue::TPrimitive(TPrimitive::TReference(graph_node.clone())),
                         t: TMapType::BTree,
                     }),
                 },
@@ -192,6 +192,71 @@ fn make_declarations() -> Declarations {
         config: vec![],
         generic_params: vec![],
         value: DeclarationValue::TPrimitive(TPrimitive::TReference(graph_data_unindexed)),
+    });
+
+    c.add(TypeDeclaration {
+        name: "BasicVec",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::TVec(Box::new(TVec::TPrimitive(TPrimitive::Tf64))),
+    });
+
+    c.add(TypeDeclaration {
+        name: "BasicMap",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::TMap(Box::new(TMap {
+            key: TPrimitive::Ti64,
+            value: TMapValue::TPrimitive(graph_node.primitive()),
+            t: TMapType::BTree,
+        })),
+    });
+
+    c.add(TypeDeclaration {
+        name: "BasicOption",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::TOption(Box::new(TOption::TPrimitive(graph_node.primitive()))),
+    });
+
+    c.add(TypeDeclaration {
+        name: "BasicStruct",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::TStruct(TStruct {
+            fields: vec![
+                StructField {
+                    name: "map",
+                    docs: "",
+                    config: vec![],
+                    field_type: StructFieldType::TPrimitive(TPrimitive::TMap(Box::new(TMap {
+                        key: TPrimitive::Ti64,
+                        value: TMapValue::TPrimitive(graph_node.primitive()),
+                        t: TMapType::BTree,
+                    }))),
+                },
+                StructField {
+                    name: "vec",
+                    docs: "",
+                    config: vec![],
+                    field_type: StructFieldType::TPrimitive(TPrimitive::TVec(Box::new(
+                        TVec::TPrimitive(graph_node.primitive()),
+                    ))),
+                },
+                StructField {
+                    name: "vec",
+                    docs: "",
+                    config: vec![],
+                    field_type: StructFieldType::TPrimitive(TPrimitive::TOption(Box::new(
+                        TOption::TPrimitive(graph_node.primitive()),
+                    ))),
+                },
+            ],
+        }),
     });
 
     c
@@ -278,6 +343,18 @@ pub struct GraphData {
 }
 
 pub type GraphDataUnindexed = GraphData<IndexableStr, IndexableStr>;
+
+pub type BasicVec = Vec<f64>;
+
+pub type BasicMap = BTreeMap<i64, GraphNode>;
+
+pub type BasicOption = Option<GraphNode>;
+
+pub struct BasicStruct {
+    pub map: BTreeMap<i64, GraphNode>,
+    pub vec: Vec<GraphNode>,
+    pub vec: Option<GraphNode>,
+}
 
 "#
     );
@@ -372,6 +449,18 @@ type GraphiteIngesterGraphData = shape(
 
 type GraphiteIngesterGraphDataUnindexed = GraphiteIngesterGraphData<GraphiteIngesterIndexableStr, GraphiteIngesterIndexableStr>;
 
+type GraphiteIngesterBasicVec = vec<float>;
+
+type GraphiteIngesterBasicMap = dict<int, GraphiteIngesterGraphNode>;
+
+type GraphiteIngesterBasicOption = ?GraphiteIngesterGraphNode;
+
+type GraphiteIngesterBasicStruct = shape(
+    'map' => dict<int, GraphiteIngesterGraphNode>,
+    'vec' => vec<GraphiteIngesterGraphNode>,
+    'vec' => ?GraphiteIngesterGraphNode,
+);
+
 "#
     );
 
@@ -453,6 +542,18 @@ export type GraphData = {|
 |};
 
 export type GraphDataUnindexed = GraphData<IndexableStr, IndexableStr>;
+
+export type BasicVec = Array<number>;
+
+export type BasicMap = {[key: number]: GraphNode};
+
+export type BasicOption = ?GraphNode;
+
+export type BasicStruct = {|
+    'map': {[key: number]: GraphNode},
+    'vec': Array<GraphNode>,
+    'vec': ?GraphNode,
+|};
 
 "#
     );

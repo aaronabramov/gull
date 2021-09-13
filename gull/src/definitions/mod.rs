@@ -15,6 +15,9 @@ pub enum TPrimitive {
         rust: Box<TPrimitive>,
         flow: Box<TPrimitive>,
     },
+    TVec(Box<TVec>),
+    TMap(Box<TMap>),
+    TOption(Box<TOption>),
 }
 
 #[derive(Debug, Clone)]
@@ -114,6 +117,8 @@ pub enum DeclarationValue {
     TEnum(TEnum),
     TSimpleEnum(TSimpleEnum),
     TMap(Box<TMap>),
+    TVec(Box<TVec>),
+    TOption(Box<TOption>),
     TPrimitive(TPrimitive),
     TStruct(TStruct),
     TTuple(TTuple),

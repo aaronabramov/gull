@@ -52,6 +52,22 @@ impl FlowCodegen {
                     self.gen_map(m)
                 )
             }
+            DeclarationValue::TVec(v) => {
+                format!(
+                    "export type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_vec(v)
+                )
+            }
+            DeclarationValue::TOption(o) => {
+                format!(
+                    "export type {}{} = {};",
+                    name,
+                    shared::generic_params(&declaration.generic_params, |g| self.gen_generic(g)),
+                    self.gen_option(o),
+                )
+            }
             DeclarationValue::TTuple(t) => {
                 format!(
                     "export type {}{} = {};",
@@ -219,6 +235,9 @@ type {} = {{|{}\n|}};",
             TPrimitive::Ti64 => "number".to_string(),
             TPrimitive::Tf64 => "number".to_string(),
             TPrimitive::THardcoded(s) => s.to_string(),
+            TPrimitive::TVec(v) => self.gen_vec(v),
+            TPrimitive::TMap(m) => self.gen_map(m),
+            TPrimitive::TOption(o) => self.gen_option(o),
             TPrimitive::TDifferentPerLanguege { flow, .. } => self.gen_primitive_type(&flow),
             TPrimitive::TGeneric(g) => self.gen_generic(g),
             TPrimitive::TReference(r) => {
