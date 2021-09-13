@@ -1,6 +1,6 @@
 [package]
 name = "gull"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["Aaron Abramov <aaron@abramov.io>"]
 edition = "2018"
 description = "type generation"
