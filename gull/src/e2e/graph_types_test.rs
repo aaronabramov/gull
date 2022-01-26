@@ -369,26 +369,26 @@ export type NodeID = number;
 
 export type NodeName = string;
 
-export type DynamicEdge<TS, TN> = {|
+export type DynamicEdge<TS, TN> = {
     'branches': {[key: TS]: Array<TN>},
     'properties': ?{[key: TS]: Array<TS>},
-|};
+};
 
-export type NodeEdges<TS, TN> = {|
+export type NodeEdges<TS, TN> = {
     'directed': Array<TN>,
     'dynamic': DynamicEdge,
     'tagged': ?{[key: TS]: Array<TN>},
-|};
+};
 
-export type GraphNode<T> = {|
+export type GraphNode<T> = {
     'name': T,
     'edges': ?NodeEdges,
-|};
+};
 
-export type Graph<T> = {|
+export type Graph<T> = {
     'nodes': {[key: T]: GraphNode},
     'timestamp': string,
-|};
+};
 
 export type GraphProxyType<T> = Graph<T>;
 

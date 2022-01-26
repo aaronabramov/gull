@@ -156,7 +156,7 @@ impl FlowCodegen {
             fields.push_str(&field_type);
         }
 
-        format!("{{|{}\n{}|}}", fields, indent_prefix)
+        format!("{{{}\n{}}}", fields, indent_prefix)
     }
 
     fn gen_simple_enum(&self, name: &str, variants: &[&str]) -> String {

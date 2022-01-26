@@ -493,15 +493,15 @@ type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 type Operation = {|
     'type': OperationType,
     // Fetch items by their IDs
-    'Fetch'?:  {|
+    'Fetch'?:  {
         // item IDs
         'items': Array<number>,
-    |},
+    },
     // Store graphs to a storage layer
-    'Store'?:  {|
+    'Store'?:  {
         // Destination frames for the storage
         'frames': Array<Frame>,
-    |},
+    },
     // Discard all graphs
     'Drop'?: boolean,
     // Not a real operation
@@ -510,9 +510,9 @@ type Operation = {|
 
 export type NodeID = number;
 
-export type GraphNode = {|
+export type GraphNode = {
     'node_id': NodeID,
-|};
+};
 
 // Wrapper value that represents a graph. It contains various top level
 // data about the graph as well as a collection of nodes. This is a long
@@ -531,7 +531,7 @@ export type GraphNode = {|
 // Some more docs after the ASCII drawings.
 // 
 // Maybe some extra line after a newline.
-export type GraphData = {|
+export type GraphData = {
     // Root nodes of the graph
     'entry_points': Array<number>,
     'nodes': {[key: number]: GraphNode},
@@ -539,7 +539,7 @@ export type GraphData = {|
     // that are represented as a map between string and string
     // and other important lines of documentation.
     'string_fields': ?{[key: string]: string},
-|};
+};
 
 export type GraphDataUnindexed = GraphData<IndexableStr, IndexableStr>;
 
@@ -549,11 +549,11 @@ export type BasicMap = {[key: number]: GraphNode};
 
 export type BasicOption = ?GraphNode;
 
-export type BasicStruct = {|
+export type BasicStruct = {
     'map': {[key: number]: GraphNode},
     'vec': Array<GraphNode>,
     'vec': ?GraphNode,
-|};
+};
 
 "#
     );
