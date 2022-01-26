@@ -238,7 +238,7 @@ type {} = {{|{}\n|}};",
             TPrimitive::TVec(v) => self.gen_vec(v),
             TPrimitive::TMap(m) => self.gen_map(m),
             TPrimitive::TOption(o) => self.gen_option(o),
-            TPrimitive::TDifferentPerLanguege { flow, .. } => self.gen_primitive_type(&flow),
+            TPrimitive::TDifferentPerLanguage { flow, .. } => self.gen_primitive_type(&flow),
             TPrimitive::TGeneric(g) => self.gen_generic(g),
             TPrimitive::TReference(r) => {
                 format!(
@@ -266,6 +266,12 @@ type {} = {{|{}\n|}};",
     fn gen_code_block(&self, b: &CodeBlock) -> String {
         match b {
             CodeBlock::Rust(_) => String::new(),
+            CodeBlock::Hack(_) => String::new(),
+            CodeBlock::Flow(lines) => lines
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
+                .join("\n"),
         }
     }
 }

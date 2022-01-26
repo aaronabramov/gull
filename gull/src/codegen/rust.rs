@@ -281,7 +281,7 @@ impl RustCodegen {
             TPrimitive::Ti64 => "i64".to_string(),
             TPrimitive::Tf64 => "f64".to_string(),
             TPrimitive::THardcoded(s) => s.to_string(),
-            TPrimitive::TDifferentPerLanguege { rust, .. } => self.gen_primitive_type(&rust),
+            TPrimitive::TDifferentPerLanguage { rust, .. } => self.gen_primitive_type(&rust),
             TPrimitive::TMap(m) => self.gen_map(m),
             TPrimitive::TVec(v) => self.gen_vec(v),
             TPrimitive::TOption(o) => self.gen_option(o),
@@ -330,6 +330,8 @@ impl RustCodegen {
 
     fn gen_code_block(&self, b: &CodeBlock) -> String {
         match b {
+            CodeBlock::Hack(_) => String::new(),
+            CodeBlock::Flow(_) => String::new(),
             CodeBlock::Rust(lines) => lines
                 .iter()
                 .map(|s| s.to_string())

@@ -35,7 +35,7 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![],
         generic_params: vec![],
-        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguege {
+        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguage {
             rust: Box::new(TPrimitive::THardcoded("crate::types::IndexableStr")),
             hack: Box::new(TPrimitive::String),
             flow: Box::new(TPrimitive::String),

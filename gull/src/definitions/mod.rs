@@ -10,7 +10,7 @@ pub enum TPrimitive {
     TGeneric(TGeneric),
     TReference(TReference),
     THardcoded(&'static str),
-    TDifferentPerLanguege {
+    TDifferentPerLanguage {
         hack: Box<TPrimitive>,
         rust: Box<TPrimitive>,
         flow: Box<TPrimitive>,
@@ -129,6 +129,8 @@ pub enum DeclarationValue {
 #[derive(Debug, Clone)]
 pub enum CodeBlock {
     Rust(Vec<&'static str>),
+    Hack(Vec<&'static str>),
+    Flow(Vec<&'static str>),
 }
 
 #[derive(Debug, Clone)]

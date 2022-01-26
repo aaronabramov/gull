@@ -254,7 +254,7 @@ type {} = shape({}\n);",
             TPrimitive::TVec(v) => self.gen_vec(v),
             TPrimitive::TMap(m) => self.gen_map(m),
             TPrimitive::TOption(o) => self.gen_option(o),
-            TPrimitive::TDifferentPerLanguege { hack, .. } => self.gen_primitive_type(&hack),
+            TPrimitive::TDifferentPerLanguage { hack, .. } => self.gen_primitive_type(&hack),
             TPrimitive::TGeneric(g) => self.gen_generic(g),
             TPrimitive::TReference(r) => {
                 format!(
@@ -283,6 +283,12 @@ type {} = shape({}\n);",
     fn gen_code_block(&self, b: &CodeBlock) -> String {
         match b {
             CodeBlock::Rust(_) => String::new(),
+            CodeBlock::Flow(_) => String::new(),
+            CodeBlock::Hack(lines) => lines
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
+                .join("\n"),
         }
     }
 }

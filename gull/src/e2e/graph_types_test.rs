@@ -4,6 +4,19 @@ use anyhow::Result;
 fn make_declarations() -> Declarations {
     let mut c = Declarations::new();
 
+    c.add(TypeDeclaration {
+        name: "",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::CodeBlock(CodeBlock::Flow(vec![
+            r#"/*
+ * @flow
+ * @some stuff
+ */"#,
+        ])),
+    });
+
     let skip_serializing_none =
         StructFieldConfig::RustAttribute(r#"#[serde(skip_serializing_if = "Option::is_none")]"#);
 
@@ -31,7 +44,7 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![],
         generic_params: vec![],
-        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguege {
+        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguage {
             rust: Box::new(TPrimitive::THardcoded("_ID")),
             hack: Box::new(TPrimitive::Ti64),
             flow: Box::new(TPrimitive::Ti64),
@@ -229,6 +242,8 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 
 
+
+
 use chrono::{DateTime, Utc};
 use crate::types::{IndexedStr as _IndexedStr, ID as _ID};
 
@@ -287,6 +302,8 @@ fn hack_test() -> Result<()> {
 
 
 
+
+
 type NSID = int;
 
 // ==========================================================================
@@ -333,6 +350,11 @@ fn flow_test() -> Result<()> {
     k9::snapshot!(
         declarations.codegen_flow()?,
         r"
+
+/*
+ * @flow
+ * @some stuff
+ */
 
 
 
