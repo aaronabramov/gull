@@ -490,7 +490,7 @@ export type StorageType = "Full" | "Delta" | "Empty" | "Broken";
 // Operation is a single unit of transormation logic
 type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 
-type Operation = {|
+type Operation = {
     'type': OperationType,
     // Fetch items by their IDs
     'Fetch'?:  {
@@ -506,7 +506,7 @@ type Operation = {|
     'Drop'?: boolean,
     // Not a real operation
     'FakeOp'?: number,
-|};
+};
 
 export type NodeID = number;
 

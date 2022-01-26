@@ -203,7 +203,7 @@ impl FlowCodegen {
         format!(
             "{}
 
-type {} = {{|{}\n|}};",
+type {} = {{{}\n}};",
             variant_type_hack_enum, name, variants
         )
     }
