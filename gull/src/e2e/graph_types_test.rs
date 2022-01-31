@@ -371,18 +371,18 @@ export type NodeName = string;
 
 export type DynamicEdge<TS, TN> = {
     'branches': {[key: TS]: Array<TN>},
-    'properties': ?{[key: TS]: Array<TS>},
+    'properties'?: {[key: TS]: Array<TS>},
 };
 
 export type NodeEdges<TS, TN> = {
     'directed': Array<TN>,
     'dynamic': DynamicEdge,
-    'tagged': ?{[key: TS]: Array<TN>},
+    'tagged'?: {[key: TS]: Array<TN>},
 };
 
 export type GraphNode<T> = {
     'name': T,
-    'edges': ?NodeEdges,
+    'edges'?: NodeEdges,
 };
 
 export type Graph<T> = {

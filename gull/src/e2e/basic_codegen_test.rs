@@ -538,7 +538,7 @@ export type GraphData = {
     // A bunch of random string fields
     // that are represented as a map between string and string
     // and other important lines of documentation.
-    'string_fields': ?{[key: string]: string},
+    'string_fields'?: {[key: string]: string},
 };
 
 export type GraphDataUnindexed = GraphData<IndexableStr, IndexableStr>;

@@ -122,6 +122,10 @@ impl FlowCodegen {
     }
 
     fn gen_option(&self, o: &TOption) -> String {
+        format!("?{}", self.gen_option_value(o))
+    }
+
+    fn gen_option_value(&self, o: &TOption) -> String {
         let value = match &o {
             TOption::TPrimitive(p) => self.gen_primitive_type(&p),
             TOption::TMap(m) => self.gen_map(m),
@@ -129,25 +133,35 @@ impl FlowCodegen {
             TOption::TSet(s) => self.gen_set(s),
             TOption::TTuple(t) => self.gen_tuple(t),
         };
-        format!("?{}", value)
+        format!("{}", value)
     }
 
     fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
         let mut fields = String::new();
 
         let indent_prefix = " ".repeat(indent);
+        let mut is_option = "";
 
         for field in &s.fields {
             let mut field_type = match &field.field_type {
                 StructFieldType::TMap(m) => self.gen_map(m),
                 StructFieldType::TSet(s) => self.gen_set(s),
-                StructFieldType::TOption(o) => self.gen_option(o),
                 StructFieldType::TPrimitive(p) => self.gen_primitive_type(&p),
                 StructFieldType::TTuple(t) => self.gen_tuple(t),
                 StructFieldType::TVec(v) => self.gen_vec(v),
+                StructFieldType::TOption(o) => {
+                    is_option = "?";
+                    self.gen_option_value(o)
+                }
             };
 
-            field_type = format!("\n    {}'{}': {},", &indent_prefix, field.name, field_type);
+            field_type = format!(
+                "\n    {}'{}'{}: {},",
+                &indent_prefix, field.name, is_option, field_type
+            );
+
+            // reset option so that other fields after it don't all become options
+            is_option = "";
 
             if let Some(doc) = format_docstring(field.docs, CommentStyle::DoubleSlash, indent + 4) {
                 field_type = format!("\n{}{}", doc, field_type);
