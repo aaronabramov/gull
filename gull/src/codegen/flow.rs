@@ -2,6 +2,7 @@ use super::docs::{format_docstring, CommentStyle};
 use super::{shared, Codegen};
 use crate::prelude::*;
 use anyhow::Result;
+use convert_case::{Case, Casing};
 
 pub struct FlowCodegen {}
 
@@ -174,12 +175,25 @@ impl FlowCodegen {
     }
 
     fn gen_simple_enum(&self, name: &str, variants: &[&str]) -> String {
-        let ty = variants
+        let ty_def = variants
             .iter()
             .map(|n| format!("\"{}\"", n))
             .collect::<Vec<_>>()
             .join(" | ");
-        format!("export type {} = {};", name, ty)
+        let ty = format!("export type {} = {};", name, ty_def);
+
+        let value_def = variants
+            .iter()
+            .map(|n| format!("\"{}\"", n))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let value = format!(
+            "export const {}: $ReadOnlyArray<{}> = [{}];",
+            name.to_case(Case::ScreamingSnake),
+            name,
+            value_def,
+        );
+        format!("{}\n\n{}", ty, value)
     }
 
     fn gen_enum(&self, name: &str, e: &TEnum) -> String {
