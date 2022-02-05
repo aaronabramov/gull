@@ -394,7 +394,7 @@ enum GraphiteIngesterOperationType: string as string {
     FETCH = "Fetch";
     STORE = "Store";
     DROP = "Drop";
-    FAKEOP = "FakeOp";
+    FAKE_OP = "FakeOp";
 }
 
 type GraphiteIngesterOperation = shape(

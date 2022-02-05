@@ -3,6 +3,7 @@ use super::shared;
 use super::Codegen;
 use crate::prelude::*;
 use anyhow::Result;
+use convert_case::{Case, Casing};
 
 pub struct HackCodegen {
     namespace: &'static str,
@@ -179,7 +180,7 @@ impl HackCodegen {
         for name in variants {
             variant_lines.push(format!(
                 r#"    {} = "{}";{}"#,
-                name.to_uppercase(),
+                name.to_case(Case::ScreamingSnake),
                 name,
                 "\n"
             ));
