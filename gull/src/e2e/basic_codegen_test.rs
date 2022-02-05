@@ -487,6 +487,8 @@ export type IndexableStr = string;
 
 export type StorageType = "Full" | "Delta" | "Empty" | "Broken";
 
+export const STORAGE_TYPE: $ReadOnlyArray<StorageType> = ["Full", "Delta", "Empty", "Broken"];
+
 // Operation is a single unit of transormation logic
 type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 
