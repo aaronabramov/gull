@@ -188,7 +188,7 @@ impl FlowCodegen {
             .collect::<Vec<_>>()
             .join(", ");
         let value = format!(
-            "export enum {} {{{}}};",
+            "export enum {}Enum {{{}}};",
             name.to_case(Case::UpperCamel),
             value_def,
         );
