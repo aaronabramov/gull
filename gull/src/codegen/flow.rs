@@ -184,13 +184,12 @@ impl FlowCodegen {
 
         let value_def = variants
             .iter()
-            .map(|n| format!("\"{}\"", n))
+            .map(|v| format!("{}", v))
             .collect::<Vec<_>>()
             .join(", ");
         let value = format!(
-            "export const {}: $ReadOnlyArray<{}> = [{}];",
-            name.to_case(Case::ScreamingSnake),
-            name,
+            "export enum {} {{{}}};",
+            name.to_case(Case::UpperCamel),
             value_def,
         );
         format!("{}\n\n{}", ty, value)
