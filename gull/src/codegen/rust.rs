@@ -106,7 +106,12 @@ impl RustCodegen {
                 )
             }
             DeclarationValue::TEnum(e) => {
-                format!("pub enum {} {}", declaration.name, self.gen_enum(e))
+                format!(
+                    "pub enum {}{} {}",
+                    declaration.name,
+                    self.gen_generic_param_definitions(&declaration.generic_params),
+                    self.gen_enum(e)
+                )
             }
             DeclarationValue::TSimpleEnum(e) => {
                 format!("pub enum {} {}", declaration.name, self.gen_simple_enum(e))

@@ -85,7 +85,7 @@ impl FlowCodegen {
                     self.gen_struct(s, 0)
                 )
             }
-            DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
+            DeclarationValue::TEnum(e) => self.gen_enum(&name, &declaration.generic_params, e),
             DeclarationValue::TSimpleEnum(e) => self.gen_simple_enum(&name, &e.variants),
             DeclarationValue::Docs => String::new(),
             DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
@@ -127,14 +127,13 @@ impl FlowCodegen {
     }
 
     fn gen_option_value(&self, o: &TOption) -> String {
-        let value = match &o {
+        match &o {
             TOption::TPrimitive(p) => self.gen_primitive_type(&p),
             TOption::TMap(m) => self.gen_map(m),
             TOption::TVec(v) => self.gen_vec(v),
             TOption::TSet(s) => self.gen_set(s),
             TOption::TTuple(t) => self.gen_tuple(t),
-        };
-        format!("{}", value)
+        }
     }
 
     fn gen_struct(&self, s: &TStruct, indent: usize) -> String {
@@ -184,7 +183,7 @@ impl FlowCodegen {
 
         let value_def = variants
             .iter()
-            .map(|v| format!("{}", v))
+            .map(|v| v.to_string())
             .collect::<Vec<_>>()
             .join(", ");
         let value = format!(
@@ -195,7 +194,7 @@ impl FlowCodegen {
         format!("{}\n\n{}", ty, value)
     }
 
-    fn gen_enum(&self, name: &str, e: &TEnum) -> String {
+    fn gen_enum(&self, name: &str, generic_params: &[TGeneric], e: &TEnum) -> String {
         let variant_types = e
             .variants
             .iter()
@@ -205,12 +204,12 @@ impl FlowCodegen {
 
         let variant_type_enum_name = format!("{}Type", name);
 
-        let variant_type_hack_enum =
-            format!("type {} = {};", variant_type_enum_name, variant_types);
+        let variant_type_hack_enum = format!(
+            "export type {} = {};",
+            variant_type_enum_name, variant_types
+        );
 
         let mut variants = String::new();
-
-        variants.push_str(&format!("\n    'type': {},", variant_type_enum_name));
 
         for variant in &e.variants {
             let mut variant_type = match &variant.variant_type {
@@ -230,8 +229,11 @@ impl FlowCodegen {
         format!(
             "{}
 
-export type {} = {{{}\n}};",
-            variant_type_hack_enum, name, variants
+export type {}{} = {{{}\n}};",
+            variant_type_hack_enum,
+            name,
+            shared::generic_params(&generic_params, |g| self.gen_generic(g)),
+            variants
         )
     }
 

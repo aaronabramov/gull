@@ -10,7 +10,7 @@ where
     } else {
         let params = params
             .iter()
-            .map(|g| gen_generic(g))
+            .map(gen_generic)
             .collect::<Vec<_>>()
             .join(", ");
         format!("<{}>", params)
