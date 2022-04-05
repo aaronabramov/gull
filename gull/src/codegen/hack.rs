@@ -86,7 +86,7 @@ impl HackCodegen {
                     self.gen_struct(s, 0)
                 )
             }
-            DeclarationValue::TEnum(e) => self.gen_enum(&name, e),
+            DeclarationValue::TEnum(e) => self.gen_enum(&name, &declaration.generic_params, e),
             DeclarationValue::TSimpleEnum(e) => self.gen_simple_enum(&name, &e.variants),
             DeclarationValue::Docs => String::new(),
             DeclarationValue::CodeBlock(b) => self.gen_code_block(b),
@@ -193,7 +193,7 @@ impl HackCodegen {
         )
     }
 
-    fn gen_enum(&self, name: &str, e: &TEnum) -> String {
+    fn gen_enum(&self, name: &str, generic_params: &[TGeneric], e: &TEnum) -> String {
         let variant_type_enum_name = format!("{}Type", name);
 
         let variant_names = e.variants.iter().map(|v| v.name).collect::<Vec<_>>();
@@ -220,8 +220,11 @@ impl HackCodegen {
             "
 {}
 
-type {} = shape({}\n);",
-            simple_enum, name, variants
+type {}{} = shape({}\n);",
+            simple_enum,
+            name,
+            shared::generic_params(generic_params, |g| self.gen_generic(g)),
+            variants
         )
     }
 

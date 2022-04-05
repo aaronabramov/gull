@@ -17,16 +17,20 @@ fn make_declarations() -> Declarations {
         value: DeclarationValue::Docs,
     });
 
-    let frame = c.add(TypeDeclaration {
-        name: "Frame",
-        docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
-        config: vec![TypeDeclarationConfig::RustAttribute("#[derive(Copy)]")],
+    let t_string_val_no_bounds_gen = TGeneric::TDefinition {
+        name: "TStringVal",
+        bounds: None,
+    };
+
+    let id = c.add(TypeDeclaration {
+        name: "ID",
+        docs: "",
+        config: vec![],
         generic_params: vec![],
-        value: DeclarationValue::TTuple(TTuple {
-            items: vec![
-                TupleItem::TPrimitive(TPrimitive::String),
-                TupleItem::TPrimitive(TPrimitive::Ti64),
-            ],
+        value: DeclarationValue::TPrimitive(TPrimitive::TDifferentPerLanguage {
+            rust: Box::new(TPrimitive::THardcoded("crate::types::ID")),
+            hack: Box::new(TPrimitive::Ti64),
+            flow: Box::new(TPrimitive::Ti64),
         }),
     });
 
@@ -39,6 +43,19 @@ fn make_declarations() -> Declarations {
             rust: Box::new(TPrimitive::THardcoded("crate::types::IndexableStr")),
             hack: Box::new(TPrimitive::String),
             flow: Box::new(TPrimitive::String),
+        }),
+    });
+
+    let frame = c.add(TypeDeclaration {
+        name: "Frame",
+        docs: "Frame represents a tuple of an Timestamp (RFC3339) and an ID",
+        config: vec![TypeDeclarationConfig::RustAttribute("#[derive(Copy)]")],
+        generic_params: vec![],
+        value: DeclarationValue::TTuple(TTuple {
+            items: vec![
+                TupleItem::TPrimitive(TPrimitive::String),
+                TupleItem::TPrimitive(TPrimitive::Ti64),
+            ],
         }),
     });
 
@@ -122,12 +139,57 @@ fn make_declarations() -> Declarations {
         }),
     });
 
+    let generic_enum = c.add(TypeDeclaration {
+        name: "GenericEnum",
+        docs: "",
+        config: vec![],
+        generic_params: vec![t_string_val_no_bounds_gen.clone()],
+        value: DeclarationValue::TEnum(TEnum {
+            variants: vec![
+                EnumVariant {
+                    name: "A",
+                    docs: "",
+                    variant_type: EnumVariantType::TPrimitive(TPrimitive::TGeneric(
+                        t_string_val_no_bounds_gen,
+                    )),
+                },
+                EnumVariant {
+                    name: "B",
+                    docs: "",
+                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Ti64),
+                },
+            ],
+        }),
+    });
+
+    let mut generic_enum_indexed = generic_enum.clone();
+    generic_enum_indexed.generic_params = vec![TGeneric::TReference(id)];
+
+    c.add(TypeDeclaration {
+        name: "GenericEnumIndexed",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::TPrimitive(generic_enum_indexed.primitive()),
+    });
+
+    let mut generic_enum_unindexed = generic_enum;
+    generic_enum_unindexed.generic_params = vec![TGeneric::TReference(indexable_str.clone())];
+
+    c.add(TypeDeclaration {
+        name: "GenericEnumUnindexed",
+        docs: "",
+        config: vec![],
+        generic_params: vec![],
+        value: DeclarationValue::TPrimitive(generic_enum_unindexed.primitive()),
+    });
+
     let graph_data = c.add(TypeDeclaration {
         name: "GraphData",
         docs: r#"Wrapper value that represents a graph. It contains various top level
         data about the graph as well as a collection of nodes. This is a long
-        multiline documentaino block that is here for testing purposes only. I'll also
-        add some Ascii diagram just to make sure nothing gets misalligned.
+        multiline documentation block that is here for testing purposes only. I'll also
+        add some Ascii diagram just to make sure nothing gets misaligned.
 
             $> SELECT name, age, hometown, credit_card_number FROM users
 
@@ -277,11 +339,13 @@ use std::collections::BTreeMap;
 // ==========================================================================
 
 
+pub type ID = crate::types::ID;
+
+pub type IndexableStr = crate::types::IndexableStr;
+
 #[derive(Copy)]
 /// Frame represents a tuple of an Timestamp (RFC3339) and an ID
 pub type Frame = (String, i64);
-
-pub type IndexableStr = crate::types::IndexableStr;
 
 pub enum StorageType {
     Full,
@@ -314,10 +378,19 @@ pub struct GraphNode {
     pub node_id: NodeID,
 }
 
+pub enum GenericEnum<TStringVal> {
+    A(TStringVal),
+    B(i64),
+}
+
+pub type GenericEnumIndexed = GenericEnum<ID>;
+
+pub type GenericEnumUnindexed = GenericEnum<IndexableStr>;
+
 /// Wrapper value that represents a graph. It contains various top level
 /// data about the graph as well as a collection of nodes. This is a long
-/// multiline documentaino block that is here for testing purposes only. I'll also
-/// add some Ascii diagram just to make sure nothing gets misalligned.
+/// multiline documentation block that is here for testing purposes only. I'll also
+/// add some Ascii diagram just to make sure nothing gets misaligned.
 /// 
 ///     $> SELECT name, age, hometown, credit_card_number FROM users
 /// 
@@ -376,10 +449,12 @@ fn hack_test() -> Result<()> {
 // ==========================================================================
 
 
-// Frame represents a tuple of an Timestamp (RFC3339) and an ID
-type GraphiteIngesterFrame = (string, int);
+type GraphiteIngesterID = int;
 
 type GraphiteIngesterIndexableStr = string;
+
+// Frame represents a tuple of an Timestamp (RFC3339) and an ID
+type GraphiteIngesterFrame = (string, int);
 
 enum GraphiteIngesterStorageType: string as string {
     FULL = "Full";
@@ -420,10 +495,25 @@ type GraphiteIngesterGraphNode = shape(
     'node_id' => GraphiteIngesterNodeID,
 );
 
+
+enum GraphiteIngesterGenericEnumType: string as string {
+    A = "A";
+    B = "B";
+}
+
+type GraphiteIngesterGenericEnum<TStringVal> = shape(
+    ?'A' => TStringVal,
+    ?'B' => int,
+);
+
+type GraphiteIngesterGenericEnumIndexed = GraphiteIngesterGenericEnum<GraphiteIngesterID>;
+
+type GraphiteIngesterGenericEnumUnindexed = GraphiteIngesterGenericEnum<GraphiteIngesterIndexableStr>;
+
 // Wrapper value that represents a graph. It contains various top level
 // data about the graph as well as a collection of nodes. This is a long
-// multiline documentaino block that is here for testing purposes only. I'll also
-// add some Ascii diagram just to make sure nothing gets misalligned.
+// multiline documentation block that is here for testing purposes only. I'll also
+// add some Ascii diagram just to make sure nothing gets misaligned.
 // 
 //     $> SELECT name, age, hometown, credit_card_number FROM users
 // 
@@ -480,20 +570,21 @@ fn flow_test() -> Result<()> {
 // ==========================================================================
 
 
-// Frame represents a tuple of an Timestamp (RFC3339) and an ID
-export type Frame = [string, number];
+export type ID = number;
 
 export type IndexableStr = string;
+
+// Frame represents a tuple of an Timestamp (RFC3339) and an ID
+export type Frame = [string, number];
 
 export type StorageType = "Full" | "Delta" | "Empty" | "Broken";
 
 export enum StorageTypeEnum {Full, Delta, Empty, Broken};
 
 // Operation is a single unit of transormation logic
-type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
+export type OperationType = "Fetch" | "Store" | "Drop" | "FakeOp";
 
 export type Operation = {
-    'type': OperationType,
     // Fetch items by their IDs
     'Fetch'?:  {
         // item IDs
@@ -516,10 +607,21 @@ export type GraphNode = {
     'node_id': NodeID,
 };
 
+export type GenericEnumType = "A" | "B";
+
+export type GenericEnum<TStringVal> = {
+    'A'?: TStringVal,
+    'B'?: number,
+};
+
+export type GenericEnumIndexed = GenericEnum<ID>;
+
+export type GenericEnumUnindexed = GenericEnum<IndexableStr>;
+
 // Wrapper value that represents a graph. It contains various top level
 // data about the graph as well as a collection of nodes. This is a long
-// multiline documentaino block that is here for testing purposes only. I'll also
-// add some Ascii diagram just to make sure nothing gets misalligned.
+// multiline documentation block that is here for testing purposes only. I'll also
+// add some Ascii diagram just to make sure nothing gets misaligned.
 // 
 //     $> SELECT name, age, hometown, credit_card_number FROM users
 // 
