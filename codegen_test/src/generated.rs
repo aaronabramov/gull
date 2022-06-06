@@ -1,3 +1,5 @@
+
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct OpInline {
     pub graphs: Vec<String>,

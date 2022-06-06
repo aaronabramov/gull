@@ -1,6 +1,6 @@
 [package]
 name = "gull"
-version = "6.0.0"
+version = "6.0.1"
 authors = ["Aaron Abramov <aaron@abramov.io>"]
 edition = "2018"
 description = "type generation"
@@ -20,6 +20,7 @@ docblock = { version = "0.0.1", optional = true }
 hex = "0.4.2"
 sha2 = "0.9.1"
 convert_case = "0.4"
+derive_builder = "0.11"
 
 [dev-dependencies]
 k9 = "0.11"
