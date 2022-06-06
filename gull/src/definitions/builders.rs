@@ -1,7 +1,7 @@
 #![allow(clippy::return_self_not_must_use)]
 
 use super::*;
-use anyhow::Result;
+use std::iter::IntoIterator;
 
 macro_rules! unwrap_opt {
     ( $builder:ident,  $optional_field:ident ) => {{
@@ -107,6 +107,14 @@ impl TStructBuilder {
     pub fn field(mut self, f: StructField) -> Self {
         self.fields.push(f);
         self
+    }
+
+    pub fn fields(self, fields: impl IntoIterator<Item = StructField>) -> Self {
+        let mut s = self;
+        for f in fields {
+            s = s.field(f)
+        }
+        s
     }
 }
 
@@ -219,6 +227,14 @@ impl TEnumBuilder {
     pub fn variant(mut self, v: EnumVariant) -> Self {
         self.variants.push(v);
         self
+    }
+
+    pub fn variants(self, variants: impl IntoIterator<Item = EnumVariant>) -> Self {
+        let mut s = self;
+        for v in variants {
+            s = s.variant(v)
+        }
+        s
     }
 }
 
