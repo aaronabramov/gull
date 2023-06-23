@@ -110,7 +110,7 @@ fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "FakeOp",
                     docs: "Not a real operation",
-                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Ti64),
+                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Tusize),
                 },
             ],
         }),
@@ -121,7 +121,7 @@ fn make_declarations() -> Declarations {
         docs: "",
         config: vec![],
         generic_params: vec![],
-        value: DeclarationValue::TPrimitive(TPrimitive::Ti64),
+        value: DeclarationValue::TPrimitive(TPrimitive::Ti32),
     });
 
     let graph_node = c.add(TypeDeclaration {
@@ -156,7 +156,7 @@ fn make_declarations() -> Declarations {
                 EnumVariant {
                     name: "B",
                     docs: "",
-                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Ti64),
+                    variant_type: EnumVariantType::TPrimitive(TPrimitive::Tu32),
                 },
             ],
         }),
@@ -199,7 +199,7 @@ fn make_declarations() -> Declarations {
             | Bobby    | 17  | El Paso, TX | 1234 4294 2492 |
             | Hannah   | 20  | Memphis, TN | 9494 2492 4024 |
             +----------+-----+-------------+----------------+
-        
+
         Some more docs after the ASCII drawings.
 
         Maybe some extra line after a newline.
@@ -369,10 +369,10 @@ pub enum Operation {
     /// Discard all graphs
     Drop(bool),
     /// Not a real operation
-    FakeOp(i64),
+    FakeOp(usize),
 }
 
-pub type NodeID = i64;
+pub type NodeID = i32;
 
 pub struct GraphNode {
     pub node_id: NodeID,
@@ -380,7 +380,7 @@ pub struct GraphNode {
 
 pub enum GenericEnum<TStringVal> {
     A(TStringVal),
-    B(i64),
+    B(u32),
 }
 
 pub type GenericEnumIndexed = GenericEnum<ID>;
